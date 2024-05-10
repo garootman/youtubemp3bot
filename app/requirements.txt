@@ -1,0 +1,5 @@
+aiogram==3.6.0
+pytest==8.0.2
+pytest==8.2.0
+python-dotenv==1.0.1
+pytube==15.0.0
