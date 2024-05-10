@@ -1,5 +1,8 @@
 aiogram==3.6.0
-pytest==8.0.2
+celery==5.4.0
 pytest==8.2.0
 python-dotenv==1.0.1
 pytube==15.0.0
+SQLAlchemy==2.0.30
+psycopg2-binary==2.9.9
+

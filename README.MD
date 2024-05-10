@@ -11,6 +11,7 @@ Turns YT links to
 
 ## Future updates
 
+- docker volume to save data
 - Name files as videos - no IDs
 - Sent mp3s to be sent by tg-ID, not as OSfile object
 - Postgres DB for tasks and users
