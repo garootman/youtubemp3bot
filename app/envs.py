@@ -44,7 +44,7 @@ if ENV.lower() == "dev":
 elif ENV.lower() == "test":
     print("Running in TEST mode")
     POSTGRES_URL = "postgresql://postgres:postgres@localhost:22432/tgytmp3"
-    REDIS_URL = "redis://localhost:6379/0"
+    REDIS_URL = "redis://:XP9Dg3BhtJ@localhost:22379/1"
 else:
     print("Running in PROD mode:", ENV)
 
