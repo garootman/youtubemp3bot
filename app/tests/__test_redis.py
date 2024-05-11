@@ -13,6 +13,7 @@ def __test_redis_connection():
     r = redis.StrictRedis.from_url("redis://localhost:6379/0")
 
     assert r.ping() == True
+    print("OK")
 
 
 if __name__ == "__main__":

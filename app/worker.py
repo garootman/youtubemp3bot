@@ -1,15 +1,14 @@
 # separate file for sending results to user
 import asyncio
+import os
 
-from aiogram import Bot, types
 from celery_config import celery_app
 from envs import ADMIN_ID, AUDIO_PATH, TG_TOKEN
 from models import SessionLocal, Task
+from telebot import TeleBot
 from ytlib import download_audio
 
-# caption_template = "Here is the audio for {}"
-
-bot = Bot(token=TG_TOKEN)
+bot = TeleBot(TG_TOKEN)
 
 
 def read_new_task(task_id):
@@ -34,8 +33,9 @@ def lookup_same_ytid(yt_id):
 
 
 @celery_app.task
-async def process_task(task_id: str):
-    # read task from DB
+def process_task(task_id: str):
+    print("called with task id", task_id)
+
     task = read_new_task(task_id)
     if not task or task.status != "NEW":
         print("No task found or task is not new")
@@ -51,11 +51,13 @@ async def process_task(task_id: str):
         title = done_task.yt_title
         try:
             # send_audio or send_voice
-            x = await bot.send_audio(
+            x = bot.send_audio(
                 chat_id=task.user_id,
                 audio=done_task.tg_file_id,
-                title=done_task.yt_title[:64] + ".mp3",  # caption=caption
+                # caption=caption,
+                title=done_task.yt_title[:64] + ".mp3",
             )
+
         except Exception as e:
             error = f"Error sending voice by media id: {e}"
             print(error)
@@ -64,13 +66,16 @@ async def process_task(task_id: str):
         # try to send the audio file mp3 from disk
         # check if mp3 file exists
         print(f"Sending audio file from disk: {file_name}")
-        file_object = types.FSInputFile(file_name)
+        # file_object = types.FSInputFile(file_name)
+        # file_object = open(file_name, "rb")
         try:
-            x = await bot.send_audio(
+            x = bot.send_audio(
                 chat_id=task.user_id,
-                audio=file_object,
-                title=done_task.yt_title[:64] + ".mp3",  # caption=caption
+                audio=open(file_name, "rb"),
+                # caption=caption,
+                title=done_task.yt_title[:64] + ".mp3",
             )
+
         except Exception as e:
             error = f"Error sending voice by file: {e}"
             print(error)
@@ -80,9 +85,10 @@ async def process_task(task_id: str):
         try:
             title, file_name = download_audio(task.yt_id, AUDIO_PATH)
             # caption = caption_template.format(title)
-            file = types.FSInputFile(file_name)
-            x = await bot.send_audio(
-                chat_id=task.user_id, audio=file, title=title[:64] + ".mp3"
+            x = bot.send_audio(
+                chat_id=task.user_id,
+                audio=open(file_name, "rb"),
+                title=title[:64] + ".mp3",
             )  # caption=caption
             print("DONE!")
         except Exception as e:
@@ -95,7 +101,7 @@ async def process_task(task_id: str):
         task.yt_title = title
     else:
         task.status = "ERROR"
-        await bot.send_message(
+        bot.send_message(
             chat_id=task.user_id, text="Error sending voice, try again later"
         )
 
@@ -106,12 +112,3 @@ async def process_task(task_id: str):
     db.commit()
     db.close()
 
-
-"""
-if __name__ == "__main__":
-    # asyncio.run(send_audio_to_admin())
-    asyncio.run(process_task("8659422b"))
-    #look =  lookup_same_ytid("AzLz4R_9EYM")
-    #print(look)
-    # new_task = read_new_task()
-"""

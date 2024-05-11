@@ -15,6 +15,9 @@ __pycache__/
 # ignore test.db file wherever it is
 test.db
 
+# ignore redis dump files
+dump.rdb
+
 # Distribution / packaging
 .Python
 build/

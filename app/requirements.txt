@@ -2,7 +2,8 @@ aiogram==3.6.0
 celery==5.4.0
 pytest==8.2.0
 python-dotenv==1.0.1
+pyTelegramBotAPI==4.17.0
 pytube==15.0.0
+redis==5.0.4
 SQLAlchemy==2.0.30
 psycopg2-binary==2.9.9
-
