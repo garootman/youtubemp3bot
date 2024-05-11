@@ -35,11 +35,18 @@ if not REDIS_PASSWORD:
     raise ValueError("No REDIS_PASSWORD set in .env")
 
 
-ENV = os.getenv("ENV")
+ENV = os.getenv("ENV", "PROD")
 if ENV.lower() == "dev":
     print("Running in dev mode")
     POSTGRES_URL = "sqlite:///./test.db"
     REDIS_URL = "redis://localhost:6379/0"
+
+elif ENV.lower() == "test":
+    print("Running in TEST mode")
+    POSTGRES_URL = "postgresql://postgres:postgres@localhost:22432/tgytmp3"
+    REDIS_URL = "redis://localhost:6379/0"
+else:
+    print("Running in PROD mode:", ENV)
 
 
 print(".env read successfully")

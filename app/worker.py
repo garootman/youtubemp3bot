@@ -111,4 +111,3 @@ def process_task(task_id: str):
     db.add(task)
     db.commit()
     db.close()
-
