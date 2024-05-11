@@ -7,17 +7,17 @@ Turns YT links to
 
 - Any valid link works
 - No need to wait for download each time
-- Sends mp3 file directly to your Telegram chat.
+- Sends mp3 file directly to your Telegram chat
 
 ## Future updates
 
-- docker pack + volume to save mp3 data
+- daily download limits by user \ chat
 - split adio to chunks by 50 MB if needed
+- docker pack + volume to save mp3 data
 - Postgres DB for tasks and users
 - follow popular channels, insta-download
 - Multilanguage, message templates & stuff
 - subscriptions to yt channels + paid stuff
-- log messaages
 
 ## License
 
