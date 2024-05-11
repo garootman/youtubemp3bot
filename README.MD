@@ -11,12 +11,9 @@ Turns YT links to
 
 ## Future updates
 
-- docker volume to save data
-- Name files as videos - no IDs
+- docker pack + volume to save mp3 data
 - split adio to chunks by 50 MB if needed
-- Sent mp3s to be sent by tg-ID, not as OSfile object
 - Postgres DB for tasks and users
-- Docker + Celery 
 - follow popular channels, insta-download
 - Multilanguage, message templates & stuff
 - subscriptions to yt channels + paid stuff
