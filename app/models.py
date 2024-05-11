@@ -1,11 +1,10 @@
 import os
 from contextlib import contextmanager
 
-from sqlalchemy import TEXT, Column, DateTime, Float, Integer, String, create_engine
-from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
-
 from assist import new_id, plainstring, utcnow
 from envs import POSTGRES_URL
+from sqlalchemy import TEXT, Column, DateTime, Float, Integer, String, create_engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
 engine = create_engine(POSTGRES_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -17,7 +16,7 @@ class Task(Base):
     id = Column(String(20), primary_key=True, index=True, default=new_id)
     user_id = Column(Integer, nullable=False)
     created_at = Column(DateTime, default=utcnow, nullable=False)
-    updated_at = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
     status = Column(String(20), default="NEW")
     yt_id = Column(String(20), nullable=False)
     yt_title = Column(String(256), default="")

@@ -11,11 +11,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
-
 from envs import ADMIN_ID, AUDIO_PATH, TG_TOKEN
 from models import SessionLocal, Task
 from worker import process_task
-from ytlib import download_audio, extract_urls, universal_check_link
+from ytlib import extract_urls, universal_check_link
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
 no_yt_links = "No youtube links found in the message"
@@ -46,15 +45,14 @@ async def msg_handler(message: Message) -> None:
     db.add(task)
     db.commit()
     process_task.delay(task.id)
+    print(f"Task {task.id} added, yt_id: {video_id}")
     return
 
 
 async def main() -> None:
     from aiogram.client.default import DefaultBotProperties
 
-    # Initialize Bot instance with default bot properties which will be passed to all API calls
     bot = Bot(token=TG_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-    # And the run events dispatching
     await dp.start_polling(bot)
 
 

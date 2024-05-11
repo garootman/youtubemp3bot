@@ -13,12 +13,14 @@ Turns YT links to
 
 - docker volume to save data
 - Name files as videos - no IDs
+- split adio to chunks by 50 MB if needed
 - Sent mp3s to be sent by tg-ID, not as OSfile object
 - Postgres DB for tasks and users
 - Docker + Celery 
 - follow popular channels, insta-download
 - Multilanguage, message templates & stuff
 - subscriptions to yt channels + paid stuff
+- log messaages
 
 ## License
 

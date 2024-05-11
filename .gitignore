@@ -12,6 +12,9 @@ __pycache__/
 # ignore DS_Store files
 .DS_Store
 
+# ignore test.db file wherever it is
+test.db
+
 # Distribution / packaging
 .Python
 build/
