@@ -1,8 +1,10 @@
 import os
 import re
+import time
+
+from pytube import YouTube
 
 from assist import now
-from pytube import YouTube
 
 
 def extract_urls(text):
@@ -37,12 +39,21 @@ def universal_check_link(link):
 def download_audio(video_id, folder):
     stt = now(True)
     url = f"https://www.youtube.com/watch?v={video_id}"
-    yt = YouTube(url)
-    title = yt.title
-    video_duration = yt.length
-    yt.streams.get_audio_only().download(folder, filename=video_id + ".mp4")
-    filepath = f"{folder}/{video_id}.mp4"
-    print(
-        f"Downloaded in {now(True) - stt} ms: '{title[:20]}...' to {filepath}, size {round(os.path.getsize(filepath)/1024/1024,2)} MB"
-    )
-    return title, filepath, video_duration
+    retries = 3
+    while retries > 0:
+        try:
+            yt = YouTube(url)
+            title = yt.title
+            video_duration = yt.length
+            yt.streams.get_audio_only().download(folder, filename=video_id + ".mp4")
+            filepath = f"{folder}/{video_id}.mp4"
+            print(
+                f"Downloaded in {now(True) - stt} ms: '{title[:20]}...' to {filepath}, size {round(os.path.getsize(filepath)/1024/1024,2)} MB"
+            )
+            return title, filepath, video_duration
+        except Exception as e:
+            msg = f"Error downloading {url}: {e}"
+            print(msg)
+            retries -= 1
+            time.sleep(1)
+    raise Exception(f"Failed to download {url}: {msg}")

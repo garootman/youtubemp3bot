@@ -3,6 +3,7 @@ import sys
 sys.path.append("../")
 
 import pytest
+
 from envs import REDIS_PASSWORD, REDIS_URL
 
 
