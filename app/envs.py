@@ -9,6 +9,8 @@ AUDIO_PATH = "./audios"
 if not os.path.exists(AUDIO_PATH):
     os.makedirs(AUDIO_PATH)
 
+MAX_FILE_SIZE = 48 * 1024 * 1024  # 48 MB
+DURATION_STR = "00:50:00"  # 50 minutes
 
 TG_TOKEN = os.getenv("TG_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")

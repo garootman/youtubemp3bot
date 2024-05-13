@@ -3,7 +3,16 @@ from contextlib import contextmanager
 
 from assist import new_id, plainstring, utcnow
 from envs import POSTGRES_URL
-from sqlalchemy import TEXT, Column, DateTime, Float, Integer, String, create_engine
+from sqlalchemy import (
+    TEXT,
+    BigInteger,
+    Column,
+    DateTime,
+    Float,
+    Integer,
+    String,
+    create_engine,
+)
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 
 engine = create_engine(POSTGRES_URL)
@@ -14,13 +23,14 @@ Base = declarative_base()
 class Task(Base):
     __tablename__ = "tasks"
     id = Column(String(20), primary_key=True, index=True, default=new_id)
-    user_id = Column(Integer, nullable=False)
+    user_id = Column(BigInteger, nullable=False)
+
     created_at = Column(DateTime, default=utcnow, nullable=False)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
     status = Column(String(20), default="NEW")
     yt_id = Column(String(20), nullable=False)
     yt_title = Column(String(256), default="")
-    tg_file_id = Column(String(256), default="")
+    tg_file_id = Column(TEXT, default="")
     error = Column(TEXT, default="")
     msg_text = Column(TEXT, default="")
 

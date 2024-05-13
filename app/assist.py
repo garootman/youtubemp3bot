@@ -12,6 +12,14 @@ def utcnow(microseconds=False):
     return datetime.now()
 
 
+def now(microseconds=False):
+    # returns utctimestamp INT
+    nn = int(datetime.now().timestamp() * 1000)
+    if not microseconds:
+        return nn // 1000 * 1000
+    return nn
+
+
 def plainstring(msg, maxlen=30):
     msg = (
         str(msg)

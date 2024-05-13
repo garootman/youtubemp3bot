@@ -1,5 +1,7 @@
+import os
 import re
 
+from assist import now
 from pytube import YouTube
 
 
@@ -32,9 +34,15 @@ def universal_check_link(link):
     return None
 
 
-def download_audio(video_id, path):
+def download_audio(video_id, folder):
+    stt = now(True)
     url = f"https://www.youtube.com/watch?v={video_id}"
     yt = YouTube(url)
     title = yt.title
-    yt.streams.get_audio_only().download(path, filename=video_id + ".mp3")
-    return title, f"{path}/{video_id}.mp3"
+    video_duration = yt.length
+    yt.streams.get_audio_only().download(folder, filename=video_id + ".mp4")
+    filepath = f"{folder}/{video_id}.mp4"
+    print(
+        f"Downloaded in {now(True) - stt} ms: '{title[:20]}...' to {filepath}, size {round(os.path.getsize(filepath)/1024/1024,2)} MB"
+    )
+    return title, filepath, video_duration
