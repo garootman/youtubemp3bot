@@ -3,12 +3,11 @@ import asyncio
 import os
 import time
 
-from telebot import TeleBot
-
 from celery_config import celery_app
 from envs import ADMIN_ID, AUDIO_PATH, DURATION_STR, MAX_FILE_SIZE, TG_TOKEN
 from models import SessionLocal, Task
 from mp3lib import split_mp4_audio
+from telebot import TeleBot
 from ytlib import download_audio
 
 bot = TeleBot(TG_TOKEN)

@@ -2,12 +2,13 @@ import os
 import re
 import time
 
-from pytube import YouTube
-
 from assist import now
+from pytube import YouTube
 
 
 def extract_urls(text):
+    if not text:
+        return []
     url_pattern = re.compile(
         r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
     )
