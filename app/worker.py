@@ -15,6 +15,7 @@ from envs import (
 from models import SessionLocal, Task
 from mp3lib import split_mp4_audio
 from telebot import TeleBot
+from telebot.types import InputMediaAudio
 from ytlib import download_audio
 
 bot = TeleBot(TG_TOKEN)
@@ -51,28 +52,39 @@ def delete_messages(chat_id, msg_batch):
                 pass
 
 
-def mass_send_audio(chat_id, audio_list, title, mode):
+def mass_send_audio(chat_id, audio_list, mode):
     sent = []
-    for i, audio in enumerate(audio_list):
-        try:
-            tit = (f"{title[:32]}_{i+1}.mp4",)
-            audio_object = audio if mode == "MEDIA" else open(audio, "rb")
-            xi = bot.send_audio(
-                chat_id=chat_id,
-                audio=audio_object,
-                title=tit,
-            )
-            time.sleep(1)
 
+    # Разбиваем аудиофайлы на части по 10 штук
+    for i in range(0, len(audio_list), 10):
+        audio_chunk = audio_list[i : i + 10]
+        media = []
+
+        for j, audio in enumerate(audio_chunk):
+            try:
+                # tit = f"{title[:32]}_{i + j + 1}.mp4"
+                audio_object = audio if mode == "MEDIA" else open(audio, "rb")
+                media.append(InputMediaAudio(media=audio_object))  # , caption=tit))
+
+            except Exception as e:
+                error = f"Error preparing audio for sending: {e}"
+                print(error)
+                media.append(None)
+
+        try:
+            sent_messages = bot.send_media_group(chat_id=chat_id, media=media)
+            sent.extend(sent_messages)
+            time.sleep(1)
         except Exception as e:
-            error = f"Error sending voice by {mode}: {e}"
+            error = f"Error sending media group: {e}"
             print(error)
-            xi = None
-        sent.append(xi)
+            sent.extend([None] * len(media))
+
     if not all(sent):
         print(f"Not all data was sent to chat {chat_id} with mode {mode}")
         delete_messages(chat_id, sent)
-        sent = None
+        sent = []
+
     return sent
 
 
@@ -87,17 +99,16 @@ def process_task(task_id: str):
     # file_name = AUDIO_PATH + task.yt_id + ".mp3"
     done_task = lookup_same_ytid(task.yt_id)
 
-    x = None
+    x = []
     dlmsg = None
     error = ""
+    title = "unknown"
 
     if done_task:
         print(f"Found same yt_id in DB: task_id={done_task.id}")
         # caption = caption_template.format(done_task.yt_title)
-        title = done_task.yt_title
-        x = mass_send_audio(
-            task.user_id, done_task.tg_file_id.split(","), title, "MEDIA"
-        )
+        # title = done_task.yt_title
+        x = mass_send_audio(task.user_id, done_task.tg_file_id.split(","), "MEDIA")
 
     # list corresponding files in AUDIO_PATH, if they are less than MAX_FILE_SIZE
     local_files = [
@@ -111,7 +122,7 @@ def process_task(task_id: str):
             f"Sending {len(local_files)} audio files from disk for yt_id: {task.yt_id}"
         )
         x = []
-        x = mass_send_audio(task.user_id, local_files, done_task.yt_title, "FILE")
+        x = mass_send_audio(task.user_id, local_files, "FILE")
 
     dlmsg = bot.send_message(
         chat_id=task.user_id,
@@ -121,7 +132,7 @@ def process_task(task_id: str):
     if not x:
         print(f"Downloading audio for yt_id: {task.yt_id}")
         try:
-            title, file_name, duration = download_audio(task.yt_id, AUDIO_PATH)
+            file_name, title = download_audio(task.yt_id, AUDIO_PATH)
 
             local_files, std, err = split_mp4_audio(
                 file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT, False
@@ -129,7 +140,7 @@ def process_task(task_id: str):
             if err:
                 raise ValueError(f"Error splitting files: {err}")
             print("Split done")
-            x = mass_send_audio(task.user_id, local_files, title, "FILE")
+            x = mass_send_audio(task.user_id, local_files, "FILE")
 
             print("DONE!")
         except Exception as e:
@@ -159,5 +170,9 @@ def process_task(task_id: str):
 
 
 if __name__ == "__main__":
-    taskid = "64f48666"
+    taskid = "cfe17602"
+    DURATION_STR = "00:01:00"
+    FFMPEG_TIMEOUT = 10
+    MAX_FILE_SIZE = 2 * 1024 * 1024
+
     process_task(taskid)

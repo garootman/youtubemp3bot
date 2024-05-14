@@ -41,17 +41,25 @@ def download_audio(video_id, folder):
     stt = now(True)
     url = f"https://www.youtube.com/watch?v={video_id}"
     retries = 3
+
+    # check if file was already downloaded
+    # if yes, return the path
+    filepath = f"{folder}/{video_id}.mp4"
+    if os.path.exists(filepath):
+        print(f"File already exists: {filepath}")
+        return filepath, "unknown"  # , None
+
     while retries > 0:
         try:
             yt = YouTube(url)
             title = yt.title
-            video_duration = yt.length
-            yt.streams.get_audio_only().download(folder, filename=video_id + ".mp4")
-            filepath = f"{folder}/{video_id}.mp4"
+            # video_duration = yt.length
+            yt.streams.get_audio_only().download(folder, filename=video_id + ".temp")
+            os.rename(f"{folder}/{video_id}.temp", f"{folder}/{video_id}.mp4")
             print(
                 f"Downloaded in {now(True) - stt} ms: '{title[:20]}...' to {filepath}, size {round(os.path.getsize(filepath)/1024/1024,2)} MB"
             )
-            return title, filepath, video_duration
+            return filepath, title  # , video_duration
         except Exception as e:
             msg = f"Error downloading {url}: {e}"
             print(msg)
