@@ -4,7 +4,14 @@ import os
 import time
 
 from celery_config import celery_app
-from envs import ADMIN_ID, AUDIO_PATH, DURATION_STR, MAX_FILE_SIZE, TG_TOKEN
+from envs import (
+    ADMIN_ID,
+    AUDIO_PATH,
+    DURATION_STR,
+    FFMPEG_TIMEOUT,
+    MAX_FILE_SIZE,
+    TG_TOKEN,
+)
 from models import SessionLocal, Task
 from mp3lib import split_mp4_audio
 from telebot import TeleBot
@@ -117,7 +124,7 @@ def process_task(task_id: str):
             title, file_name, duration = download_audio(task.yt_id, AUDIO_PATH)
 
             local_files, std, err = split_mp4_audio(
-                file_name, DURATION_STR, MAX_FILE_SIZE, False
+                file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT, False
             )
             if err:
                 raise ValueError(f"Error splitting files: {err}")
