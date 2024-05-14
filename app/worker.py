@@ -52,7 +52,7 @@ def delete_messages(chat_id, msg_batch):
                 pass
 
 
-def mass_send_audio(chat_id, audio_list, mode):
+def mass_send_audio_album(chat_id, audio_list, mode):
     sent = []
 
     # Разбиваем аудиофайлы на части по 10 штук
@@ -85,6 +85,31 @@ def mass_send_audio(chat_id, audio_list, mode):
         delete_messages(chat_id, sent)
         sent = []
 
+    return sent
+
+
+def mass_send_audio(chat_id, audio_list, mode):
+    sent = []
+    for i, audio in enumerate(audio_list):
+        try:
+            # tit = (f"{title[:32]}_{i+1}.mp4",)
+            audio_object = audio if mode == "MEDIA" else open(audio, "rb")
+            xi = bot.send_audio(
+                chat_id=chat_id,
+                audio=audio_object,
+                # title=tit,
+            )
+            time.sleep(1)
+
+        except Exception as e:
+            error = f"Error sending voice by {mode}: {e}"
+            print(error)
+            xi = None
+        sent.append(xi)
+    if not all(sent):
+        print(f"Not all data was sent to chat {chat_id} with mode {mode}")
+        delete_messages(chat_id, sent)
+        sent = []
     return sent
 
 
