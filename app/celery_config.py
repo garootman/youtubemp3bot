@@ -7,7 +7,3 @@ celery_app.autodiscover_tasks(["worker"])
 
 # Optional configuration, see the application user guide.
 celery_app.conf.update(result_expires=3600, worker_concurrency=10)
-
-
-if __name__ == "__ma11in__":
-    celery_app.start()
