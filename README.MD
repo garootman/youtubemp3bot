@@ -12,6 +12,7 @@ Turns YT links to
 
 ## Future updates
 
+- age-restricted videos
 - daily download limits by user \ chat
 - docker pack + volume to save mp3 data
 - follow popular channels, insta-download
