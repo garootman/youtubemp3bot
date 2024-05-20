@@ -1,22 +1,23 @@
 # YouTube to MP3 Telegram Bot
 
 Code for Telegram bot: https://t.me/tube2mp3bot
-Turns YT links to 
+Turns YT links to mp4 audio files
 
 ## Features
 
 - Any valid link works
-- No need to wait for download each time
-- Sends mp3 file directly to your Telegram chat
-- Large videos also work - over 50 MB
+- All video duration from youtube (10h? ok!)
+- Sends audio file directly to your Telegram chat
 
 ## Future updates
 
-- age-restricted videos
-- daily download limits by user \ chat
 - docker pack + volume to save mp3 data
-- follow popular channels, insta-download
+- GH actions deploy
+- linting and stuff, bandit, mypy, docs, etc.
 - Multilanguage, message templates & stuff
+- age-restricted videos bypass
+- daily download limits by user \ chat
+- follow popular channels, insta-download
 - subscriptions to yt channels + paid stuff
 
 ## License
