@@ -11,6 +11,7 @@ Turns YT links to mp4 audio files
 
 ## Future updates
 
+- command to clear chat /clear!
 - docker pack + volume to save mp3 data
 - GH actions deploy
 - linting and stuff, bandit, mypy, docs, etc.
