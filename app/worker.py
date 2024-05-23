@@ -27,6 +27,14 @@ def read_new_task(task_id):
     db.close()
     return task
 
+def get_failed_tasks():
+    db = SessionLocal()
+    # get all tasks with status error
+    tasks = db.query(Task).filter(Task.status == "ERROR").all()
+    db.close()
+    return tasks
+
+
 
 def lookup_same_ytid(yt_id):
     # find task with same yt_id, that is complete and has a tg_file_id
@@ -190,6 +198,18 @@ def process_task(task_id: str):
     db.add(task)
     db.commit()
     db.close()
+
+
+@celery_app.task
+def rerun_failed_tasks():
+    error_tasks = get_failed_tasks()
+    print("Re-running failed tasks. Got ", len(error_tasks), "total tasks")
+    for task in error_tasks:
+        print(f"Re-running task {task.id} as of {task.created_at}, error was: {task.error}")
+        time.sleep(1)
+        # rocess_task(task.id)
+
+
 
 
 if __name__ == "__main__":
