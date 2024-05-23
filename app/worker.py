@@ -13,7 +13,7 @@ from envs import (
     TG_TOKEN,
 )
 from models import SessionLocal, Task
-from mp3lib import split_mp4_audio
+from mp3lib import split_audio
 from telebot import TeleBot
 from telebot.types import InputMediaAudio
 from ytlib import download_audio
@@ -62,7 +62,6 @@ def mass_send_audio_album(chat_id, audio_list, mode):
 
         for j, audio in enumerate(audio_chunk):
             try:
-                # tit = f"{title[:32]}_{i + j + 1}.mp4"
                 audio_object = audio if mode == "MEDIA" else open(audio, "rb")
                 media.append(InputMediaAudio(media=audio_object))  # , caption=tit))
 
@@ -92,7 +91,6 @@ def mass_send_audio(chat_id, audio_list, mode):
     sent = []
     for i, audio in enumerate(audio_list):
         try:
-            # tit = (f"{title[:32]}_{i+1}.mp4",)
             audio_object = audio if mode == "MEDIA" else open(audio, "rb")
             xi = bot.send_audio(
                 chat_id=chat_id,
@@ -159,7 +157,7 @@ def process_task(task_id: str):
         try:
             file_name, title = download_audio(task.yt_id, AUDIO_PATH)
 
-            local_files, std, err = split_mp4_audio(
+            local_files, std, err = split_audio(
                 file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT, False
             )
             if err:
@@ -195,9 +193,12 @@ def process_task(task_id: str):
 
 
 if __name__ == "__main__":
-    taskid = "cfe17602"
-    DURATION_STR = "00:01:00"
-    FFMPEG_TIMEOUT = 10
-    MAX_FILE_SIZE = 2 * 1024 * 1024
+    # read task_id from command line
+    import sys
 
-    process_task(taskid)
+    task_id = sys.argv[1] if len(sys.argv) > 1 else None
+    if not task_id:
+        print("No task_id provided")
+        sys.exit(1)
+
+    process_task(task_id)

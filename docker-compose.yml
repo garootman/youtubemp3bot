@@ -1,33 +1,33 @@
 services:
-  tgbot:
-    build:
-      context: .
-      dockerfile: ./app/Dockerfile
-      args:
-        - OPENAI_TOKEN
-        - POSTGRES_URL
-        - REDIS_PASSWORD
-    env_file:
-          - .env
-    image: pomidor-server
-    ports:
-      - "${SERVER_PORT}:8000"
-    restart: always
+#  tgbot:
+#    build:
+#      context: .
+#      dockerfile: ./app/Dockerfile
+#      args:
+#        - OPENAI_TOKEN
+#        - POSTGRES_URL
+#        - REDIS_PASSWORD
+#    env_file:
+#          - .env
+#    image: pomidor-server
+#    ports:
+#      - "${SERVER_PORT}:8000"
+#    restart: always
 
-  worker:
-    build:
-      context: .
-      dockerfile: ./app_worker/Dockerfile
-      args:
-        - OPENAI_TOKEN
-        - POSTGRES_URL
-        - REDIS_PASSWORD
-    env_file:
-          - .env
-    image: pomidor-worker
-    restart: always
-    volumes:
-      - audio_data:/app/audio
+#  worker:
+#    build:
+#      context: .
+#      dockerfile: ./app_worker/Dockerfile
+#      args:
+#        - OPENAI_TOKEN
+#        - POSTGRES_URL
+#        - REDIS_PASSWORD
+#    env_file:
+#          - .env
+#    image: pomidor-worker
+#    restart: always
+#    volumes:
+#      - audio_data:/app/audio
 
 
 

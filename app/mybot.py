@@ -13,10 +13,10 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
+from assist import extract_urls, universal_check_link
 from envs import ADMIN_ID, AUDIO_PATH, TG_TOKEN
 from models import SessionLocal, Task
 from worker import process_task
-from ytlib import extract_urls, universal_check_link
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
 no_yt_links = "No youtube links found in the message"

@@ -5,14 +5,14 @@ import subprocess
 from assist import now
 
 
-def split_mp4_audio(filepath, chunklenstr, file_size, timeout, delete_original=False):
+def split_audio(filepath, chunklenstr, file_size, timeout, delete_original=False):
     if os.path.getsize(filepath) <= file_size:
         return [filepath], "", ""
 
     stt = now(True)
     directory, filename = os.path.split(filepath)
-    basename, _ = os.path.splitext(filename)
-    output_filename = os.path.join(directory, basename + "_%02d.mp4")
+    basename, file_ext = os.path.splitext(filename)
+    output_filename = os.path.join(directory, basename + "_%02d."+ file_ext)
 
     command = [
         "ffmpeg",
@@ -63,4 +63,4 @@ def split_mp4_audio(filepath, chunklenstr, file_size, timeout, delete_original=F
 
 if __name__ == "__main__":
     filepath = "./audios/u_pnia4Xhlw.mp4"
-    split_mp4_audio(filepath, "00:40:00", 50 * 1024 * 1024, 60, delete_original=False)
+    split_audio(filepath, "00:40:00", 50 * 1024 * 1024, 60, delete_original=False)

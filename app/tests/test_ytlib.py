@@ -11,7 +11,7 @@ broken_path = "https://www.youtube.com/watch?v=rX3W5evpeJX"
 
 
 def test_link_parsing():
-    from ytlib import universal_check_link
+    from assist import universal_check_link
 
     assert (
         universal_check_link("https://youtu.be/YwAvrJCyZ04?si=Xwzge_T3Um4ye0Ec")
@@ -39,7 +39,7 @@ def test_video_download():
     from ytlib import download_video
 
     vid_id = "rX3W5evpeJE"
-    assert download_video(vid_id, "./videos") == f"./videos/{vid_id}.mp4"
+    assert download_video(vid_id, "./videos") == f"./videos/{vid_id}.m4a"
 
 
 def test_fail_download():
