@@ -8,3 +8,4 @@ redis==5.0.4
 SQLAlchemy==2.0.30
 psycopg2-binary==2.9.9
 pydub==0.25.1
+yt_dlp==2024.4.9
