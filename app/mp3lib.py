@@ -12,7 +12,7 @@ def split_audio(filepath, chunklenstr, file_size, timeout, delete_original=False
     stt = now(True)
     directory, filename = os.path.split(filepath)
     basename, file_ext = os.path.splitext(filename)
-    output_filename = os.path.join(directory, basename + "_%02d."+ file_ext)
+    output_filename = os.path.join(directory, basename + "_%02d." + file_ext)
 
     command = [
         "ffmpeg",

@@ -43,6 +43,13 @@ async def feedback_command_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(FeedbackState.waiting_for_feedback)
 
 
+@form_router.message(Command("clear"))
+async def delete_chat_history(message: Message, state: FSMContext) -> None:
+    # a command to delete chat history
+    await state.clear()
+    await message.answer("Will clear chat history")
+
+
 @form_router.message(FeedbackState.waiting_for_feedback)
 async def feedback_message_handler(message: Message, state: FSMContext) -> None:
     # await bot.forward_message(ADMIN_ID, message.chat.id, message.message_id)
