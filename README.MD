@@ -11,6 +11,7 @@ Turns YT links to mp4 audio files
 
 ## Future updates
 
+- migrate from shitty pytube (https://stackoverflow.com/questions/70060263/pytube-attributeerror-nonetype-object-has-no-attribute-span)
 - command to clear chat /clear!
 - docker pack + volume to save mp3 data
 - GH actions deploy
