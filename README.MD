@@ -11,6 +11,7 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
+- bypass country\region lock
 - command to clear chat /clear!
 - docker pack + volume to save mp3 data
 - GH actions deploy
