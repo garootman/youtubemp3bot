@@ -21,6 +21,14 @@ def download_audio(url, task_id, folder):
     ydl_opts = {
         "format": "bestaudio[ext=m4a]/bestaudio",
         "outtmpl": f"{folder}/{task_id}.m4a",
+        "bypass_geoblock": True,
+        "quiet": True,
+        "noplaylist": True,
+        'geo_bypass': True,  #
+#        "no_warnings": True,
+#        "ignoreerrors": True,
+#        "nooverwrites": True,
+#        "writethumbnail": True,
     }
 
     while retries > 0:
