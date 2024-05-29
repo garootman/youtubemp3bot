@@ -54,7 +54,7 @@ def send_upd_messages(ids, tg_message_txt, only_admin=True):
             sent += 1
         except Exception as e:
             errors += 1
-            print(f"Error sending message: {e}")
+            print(f"Error sending message to {user_tg_id}: {e}")
 
     print(f"Sent {sent} messages total, {errors} errors.")
 
