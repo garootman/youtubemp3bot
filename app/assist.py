@@ -48,29 +48,28 @@ def extract_urls(text):
 def universal_check_link(link):
     # Regular expressions for different YouTube URL formats
     regexes = [
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/watch\?v=([^&]+)",
-        r"http(?:s?):\/\/youtu\.be\/([^?]+)",
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/embed\/([^?]+)",
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/v\/([^?]+)",
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/playlist\?list=([^&]+)",
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/music\?list=([^&]+)",
-        r"http(?:s?):\/\/music\.youtube\.com\/watch\?v=([^&]+)",
-        r"http(?:s?):\/\/music\.youtube\.com\/playlist\?list=([^&]+)",
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/channel\/[^\/]+\/live",  # Live stream by channel
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/c\/[^\/]+\/live",  # Live stream by custom channel URL
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/user\/[^\/]+\/live",  # Live stream by user URL
-        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/watch\?v=[^&]+&live",  # Live stream by watch URL with live parameter
+        r"http(?:s?)://(?:www\.)?youtube\.com/watch\?v=",
+        r"http(?:s?)://(?:www\.)?youtube\.com/embed/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/v/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/live/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/playlist\?list=",
+        r"http(?:s?)://(?:www\.)?youtube\.com/shorts/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/channel/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/user/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/c/",
+        r"http(?:s?)://(?:www\.)?youtube\.com/@",
+        r"http(?:s?)://(?:www\.)?youtube\.com/music/",
+        r"http(?:s?)://youtu\.be/",
     ]
-
     for regex in regexes:
         match = re.match(regex, link)
         if match:
-            return match.group(1)
-
-    return []
+            return True
+    return False
 
 
 if __name__ == "__main__":
-    print(new_id())
-    print(utcnow())
-    print(plainstring("Hello, world!"))
+    x = universal_check_link(
+        "https://www.youtube.com/live/ePqjCJAQ3yY?si=uejx2Iw5vOp0agLW"
+    )
+    print(x)
