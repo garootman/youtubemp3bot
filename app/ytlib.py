@@ -1,7 +1,7 @@
 import os
 import time
 
-from assist import now, new_id
+from assist import new_id, now
 from yt_dlp import YoutubeDL
 
 
@@ -44,4 +44,4 @@ if __name__ == "__main__":
     # Test the download_audio function
     stream_url = "https://www.youtube.com/live/Dv1s15JAAsM?si=BhvL3NUIuhxoEDQx"
     p, t = download_audio(stream_url, new_id(), "./audios")
-    print (p, t)
+    print(p, t)

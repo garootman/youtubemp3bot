@@ -31,6 +31,7 @@ class Task(Base):
     yt_id = Column(String(20), nullable=False)
     yt_title = Column(String(256), default="")
     tg_file_id = Column(TEXT, default="")
+    url = Column(TEXT, default="")
     error = Column(TEXT, default="")
     msg_text = Column(TEXT, default="")
 

@@ -36,13 +36,13 @@ def get_failed_tasks():
     return tasks
 
 
-def lookup_same_ytid(yt_id):
+def lookup_same_url(url):
     # find task with same yt_id, that is complete and has a tg_file_id
     # select one with the latest timestamp in updated_at
     db = SessionLocal()
     task = (
         db.query(Task)
-        .filter(Task.yt_id == yt_id, Task.status == "COMPLETE", Task.tg_file_id != "")
+        .filter(Task.url == url, Task.status == "COMPLETE", Task.tg_file_id != "")
         .order_by(Task.updated_at.desc())
         .first()
     )
@@ -105,7 +105,6 @@ def mass_send_audio(chat_id, audio_list, mode, title):
                 chat_id=chat_id,
                 audio=audio_object,
                 title=tit,
-
             )
             time.sleep(1)
 
@@ -130,7 +129,7 @@ def process_task(task_id: str):
         print("No task found or task is not new")
         return
     # file_name = AUDIO_PATH + task.yt_id + ".mp3"
-    done_task = lookup_same_ytid(task.yt_id)
+    done_task = lookup_same_url(task.url)
 
     x = []
     dlmsg = None
@@ -141,7 +140,9 @@ def process_task(task_id: str):
         print(f"Found same yt_id in DB: task_id={done_task.id}")
         # caption = caption_template.format(done_task.yt_title)
         # title = done_task.yt_title
-        x = mass_send_audio(task.user_id, done_task.tg_file_id.split(","), "MEDIA", title)
+        x = mass_send_audio(
+            task.user_id, done_task.tg_file_id.split(","), "MEDIA", done_task.yt_title
+        )
 
     # list corresponding files in AUDIO_PATH, if they are less than MAX_FILE_SIZE
     """
@@ -166,10 +167,9 @@ def process_task(task_id: str):
     )
 
     if not x:
-        print(f"Downloading audio for yt_id: {task.yt_id}")
+        print(f"Downloading audio for url: {task.url}")
         try:
-            download_audio(task.yt_link, task_id, AUDIO_PATH)
-            file_name, title = download_audio(task.yt_id, AUDIO_PATH)
+            file_name, title = download_audio(task.url, task_id, AUDIO_PATH)
 
             local_files, std, err = split_audio(
                 file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT, False
@@ -196,6 +196,9 @@ def process_task(task_id: str):
         task.status = "ERROR"
         bot.send_message(
             chat_id=task.user_id, text="Error sending voice, try again later"
+        )
+        bot.send_message(
+            chat_id=ADMIN_ID, text=f"Error sending msg for task {task_id}: {error}"
         )
 
     # save updated task to DB

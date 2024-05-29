@@ -15,7 +15,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from assist import extract_urls, universal_check_link
 from envs import ADMIN_ID, AUDIO_PATH, TG_TOKEN
-from models import SessionLocal, Task
+from models import SessionLocal, Task, get_db, session_scope
 from worker import process_task
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
@@ -61,20 +61,31 @@ async def feedback_message_handler(message: Message, state: FSMContext) -> None:
 @form_router.message()
 async def msg_handler(message: Message) -> None:
     links = extract_urls(message.text)
+    if not links:
+        await message.reply(no_yt_links)
+        return
+    url = links[0]
+    """
     yt_ids = [
         universal_check_link(link) for link in links if universal_check_link(link)
     ]
     if not yt_ids:
         await message.reply(no_yt_links)
         return
+    
     video_id = yt_ids[0]
+    """
     # add a task to database
     db = SessionLocal()
-    task = Task(user_id=message.from_user.id, yt_id=video_id, msg_text=message.text)
+    # db = next(get_db())
+    task = Task(
+        user_id=message.from_user.id, msg_text=message.text, url=url, yt_id="no_yt_id"
+    )
     db.add(task)
     db.commit()
     process_task.delay(task.id)
-    print(f"Task {task.id} added, yt_id: {video_id}")
+    print(f"Task {task.id} added, url: {url}")
+    db.close()
     return
 
 
