@@ -1,24 +1,26 @@
 import os
 import time
 
-from assist import now
+from assist import now, new_id
 from yt_dlp import YoutubeDL
 
 
-def download_audio(video_id, folder):
+def download_audio(url, task_id, folder):
     stt = now(True)
-    url = f"https://www.youtube.com/watch?v={video_id}"
     retries = 3
 
     # Check if file was already downloaded
-    filepath = f"{folder}/{video_id}.m4a"
+    filepath = f"{folder}/{task_id}.m4a"
+
+    """
     if os.path.exists(filepath):
         print(f"File already exists: {filepath}")
         return filepath, "unknown"
+    """
 
     ydl_opts = {
         "format": "bestaudio[ext=m4a]/bestaudio",
-        "outtmpl": f"{folder}/{video_id}.m4a",
+        "outtmpl": f"{folder}/{task_id}.m4a",
     }
 
     while retries > 0:
@@ -40,8 +42,6 @@ def download_audio(video_id, folder):
 
 if __name__ == "__main__":
     # Test the download_audio function
-    restricted_video_url = "https://www.youtube.com/watch?v=Q_cZcXXWpIk"
-    x = YouTube(restricted_video_url, use_oauth=True, allow_oauth_cache=True)
-    print(dir(x))
-    print(x.title)
-    # download_audio("dQw4w9WgXcQ", "downloads")
+    stream_url = "https://www.youtube.com/live/Dv1s15JAAsM?si=BhvL3NUIuhxoEDQx"
+    p, t = download_audio(stream_url, new_id(), "./audios")
+    print (p, t)

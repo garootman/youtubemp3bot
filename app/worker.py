@@ -95,15 +95,17 @@ def mass_send_audio_album(chat_id, audio_list, mode):
     return sent
 
 
-def mass_send_audio(chat_id, audio_list, mode):
+def mass_send_audio(chat_id, audio_list, mode, title):
     sent = []
     for i, audio in enumerate(audio_list):
         try:
             audio_object = audio if mode == "MEDIA" else open(audio, "rb")
+            tit = f"{title}_{i+1}.m4a"
             xi = bot.send_audio(
                 chat_id=chat_id,
                 audio=audio_object,
-                # title=tit,
+                title=tit,
+
             )
             time.sleep(1)
 
@@ -139,21 +141,24 @@ def process_task(task_id: str):
         print(f"Found same yt_id in DB: task_id={done_task.id}")
         # caption = caption_template.format(done_task.yt_title)
         # title = done_task.yt_title
-        x = mass_send_audio(task.user_id, done_task.tg_file_id.split(","), "MEDIA")
+        x = mass_send_audio(task.user_id, done_task.tg_file_id.split(","), "MEDIA", title)
 
     # list corresponding files in AUDIO_PATH, if they are less than MAX_FILE_SIZE
+    """
     local_files = [
         os.path.join(AUDIO_PATH, file)
         for file in os.listdir(AUDIO_PATH)
         if file.startswith(task.yt_id)
         and os.path.getsize(os.path.join(AUDIO_PATH, file)) <= MAX_FILE_SIZE
     ]
+    
     if not x and done_task and local_files:
         print(
             f"Sending {len(local_files)} audio files from disk for yt_id: {task.yt_id}"
         )
         x = []
         x = mass_send_audio(task.user_id, local_files, "FILE")
+    """
 
     dlmsg = bot.send_message(
         chat_id=task.user_id,
@@ -163,6 +168,7 @@ def process_task(task_id: str):
     if not x:
         print(f"Downloading audio for yt_id: {task.yt_id}")
         try:
+            download_audio(task.yt_link, task_id, AUDIO_PATH)
             file_name, title = download_audio(task.yt_id, AUDIO_PATH)
 
             local_files, std, err = split_audio(
@@ -171,7 +177,7 @@ def process_task(task_id: str):
             if err:
                 raise ValueError(f"Error splitting files: {err}")
             print("Split done")
-            x = mass_send_audio(task.user_id, local_files, "FILE")
+            x = mass_send_audio(task.user_id, local_files, "FILE", title)
 
             print("DONE!")
         except Exception as e:

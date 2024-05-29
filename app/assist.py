@@ -56,6 +56,10 @@ def universal_check_link(link):
         r"http(?:s?):\/\/(?:www\.)?youtube\.com\/music\?list=([^&]+)",
         r"http(?:s?):\/\/music\.youtube\.com\/watch\?v=([^&]+)",
         r"http(?:s?):\/\/music\.youtube\.com\/playlist\?list=([^&]+)",
+        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/channel\/[^\/]+\/live",  # Live stream by channel
+        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/c\/[^\/]+\/live",        # Live stream by custom channel URL
+        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/user\/[^\/]+\/live",    # Live stream by user URL
+        r"http(?:s?):\/\/(?:www\.)?youtube\.com\/watch\?v=[^&]+&live",   # Live stream by watch URL with live parameter
     ]
 
     for regex in regexes:
@@ -63,8 +67,7 @@ def universal_check_link(link):
         if match:
             return match.group(1)
 
-    return None
-
+    return []
 
 if __name__ == "__main__":
     print(new_id())
