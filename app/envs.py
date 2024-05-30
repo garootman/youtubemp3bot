@@ -38,6 +38,10 @@ if not REDIS_PASSWORD:
     raise ValueError("No REDIS_PASSWORD set in .env")
 
 
+PROXY_URL = os.getenv("PROXY_URL", None)
+if PROXY_URL:
+    print("Using proxy:", PROXY_URL)
+
 ENV = os.getenv("ENV", "PROD")
 if ENV.lower() == "dev":
     print("Running in dev mode")

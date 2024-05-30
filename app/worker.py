@@ -10,6 +10,7 @@ from envs import (
     DURATION_STR,
     FFMPEG_TIMEOUT,
     MAX_FILE_SIZE,
+    PROXY_URL,
     TG_TOKEN,
 )
 from models import SessionLocal, Task
@@ -120,6 +121,14 @@ def mass_send_audio(chat_id, audio_list, mode, title):
     return sent
 
 
+def cleanup_files(audio_folder):
+    # deletes all m4a files in audio_folder
+    for file in os.listdir(audio_folder):
+        if file.lower().endswith("m4a"):
+            filepath = os.path.join(audio_folder, file)
+            os.remove(filepath)
+
+
 @celery_app.task
 def process_task(task_id: str):
     print("called with task id", task_id)
@@ -169,7 +178,7 @@ def process_task(task_id: str):
     if not x:
         print(f"Downloading audio for url: {task.url}")
         try:
-            file_name, title = download_audio(task.url, task_id, AUDIO_PATH)
+            file_name, title = download_audio(task.url, task_id, AUDIO_PATH, PROXY_URL)
 
             local_files, std, err = split_audio(
                 file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT, False
@@ -207,6 +216,7 @@ def process_task(task_id: str):
     db.add(task)
     db.commit()
     db.close()
+    cleanup_files(AUDIO_PATH)
 
 
 @celery_app.task
@@ -227,7 +237,10 @@ if __name__ == "__main__":
 
     task_id = sys.argv[1] if len(sys.argv) > 1 else None
     if not task_id:
-        print("No task_id provided")
+        print("No task_id provided, but i have these failed tasks:")
+        all_tasks = get_failed_tasks()
+        for t in all_tasks:
+            print(f"Task {t.id} created at {t.created_at}")
         sys.exit(1)
 
     process_task(task_id)

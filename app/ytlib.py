@@ -5,7 +5,7 @@ from assist import new_id, now
 from yt_dlp import YoutubeDL
 
 
-def download_audio(url, task_id, folder):
+def download_audio(url, task_id, folder, proxy=None):
     stt = now(True)
     retries = 3
 
@@ -24,12 +24,14 @@ def download_audio(url, task_id, folder):
         "bypass_geoblock": True,
         "quiet": True,
         "noplaylist": True,
-        'geo_bypass': True,  #
-#        "no_warnings": True,
-#        "ignoreerrors": True,
-#        "nooverwrites": True,
-#        "writethumbnail": True,
+        "geo_bypass": True,  #
+        #        "no_warnings": True,
+        #        "ignoreerrors": True,
+        #        "nooverwrites": True,
+        #        "writethumbnail": True,
     }
+    if proxy:
+        ydl_opts["proxy"] = proxy
 
     while retries > 0:
         try:
@@ -51,5 +53,5 @@ def download_audio(url, task_id, folder):
 if __name__ == "__main__":
     # Test the download_audio function
     stream_url = "https://www.youtube.com/live/Dv1s15JAAsM?si=BhvL3NUIuhxoEDQx"
-    p, t = download_audio(stream_url, new_id(), "./audios")
+    p, t = download_audio(stream_url, new_id(), "./audios", proxy=None)
     print(p, t)
