@@ -1,8 +1,9 @@
 import os
 import time
 
-from assist import new_id, now
 from yt_dlp import YoutubeDL
+
+from assist import new_id, now
 
 
 def download_audio(url, task_id, folder, proxy=None):

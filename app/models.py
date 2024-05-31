@@ -1,8 +1,6 @@
 import os
 from contextlib import contextmanager
 
-from assist import new_id, plainstring, utcnow
-from envs import POSTGRES_URL
 from sqlalchemy import (
     TEXT,
     BigInteger,
@@ -14,6 +12,9 @@ from sqlalchemy import (
     create_engine,
 )
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
+
+from assist import new_id, plainstring, utcnow
+from envs import POSTGRES_URL
 
 engine = create_engine(POSTGRES_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

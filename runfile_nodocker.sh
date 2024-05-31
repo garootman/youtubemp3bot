@@ -5,6 +5,5 @@ pip install -r requirements.txt
 
 python mybot.py
 
-celery -A worker.celery_app worker -l info --without-gossip --without-mingle --without-heartbeat
-
-
+celery -A worker.celery_app worker -l info --events
+celery -A worker.celery_app events
