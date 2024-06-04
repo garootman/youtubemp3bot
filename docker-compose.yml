@@ -1,71 +1,52 @@
 services:
-#  tgbot:
-#    build:
-#      context: .
-#      dockerfile: ./app/Dockerfile
-#      args:
-#        - OPENAI_TOKEN
-#        - POSTGRES_URL
-#        - REDIS_PASSWORD
-#    env_file:
-#          - .env
-#    image: pomidor-server
-#    ports:
-#      - "${SERVER_PORT}:8000"
-#    restart: always
-
-#  worker:
-#    build:
-#      context: .
-#      dockerfile: ./app_worker/Dockerfile
-#      args:
-#        - OPENAI_TOKEN
-#        - POSTGRES_URL
-#        - REDIS_PASSWORD
-#    env_file:
-#          - .env
-#    image: pomidor-worker
-#    restart: always
-#    volumes:
-#      - audio_data:/app/audio
-
-
-
-
-  db:
-    image: postgres:latest
+  tgbot:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile_tgbot
+      args:
+        - ARG POSTGRES_URL
+        - ARG REDIS_URL
+        - ARG REDIS_PASSWORD
+        - ARG TG_TOKEN
+        - ARG ADMIN_ID
+        - ARG PROXY_URL
+        - ARG ENV
+    env_file:
+          - .env
+    image: yt2mp3bot
     restart: always
-    container_name: postgres
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-      PGDATA: /var/lib/postgresql/data/pgdata
+    networks:
+      - default
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile_worker
+      args:
+        - ARG POSTGRES_URL
+        - ARG REDIS_URL
+        - ARG REDIS_PASSWORD
+        - ARG TG_TOKEN
+        - ARG ADMIN_ID
+        - ARG PROXY_URL
+        - ARG ENV
+    env_file:
+          - .env
+    image: yt2mp3_worker
+    restart: always
     volumes:
-      - postgres_data:/var/lib/postgresql/data:rw
-    ports:
-      - "${POSTGRES_PORT}:5432"     
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: '0.2'
-          memory: 300M
+      - audio_data:/app/audios
+    networks:
+      - default
 
-  redis:
-    image: redis:latest
-    restart: always
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    ports:
-      - "${REDIS_PORT}:6379"
+
+
+networks:
+  default:
+    external:
+      name: ${NETWORK_NAME}
 
 
 volumes:
-  postgres_data:
   audio_data:
 

@@ -21,10 +21,6 @@ if not ADMIN_ID:
     raise ValueError("No ADMIN_ID set in .env")
 
 
-REDIS_URL = os.getenv("REDIS_URL")
-if not REDIS_URL:
-    raise ValueError("No REDIS_URL set in .env")
-
 POSTGRES_URL = os.getenv("POSTGRES_URL")
 if not POSTGRES_URL:
     raise ValueError("No POSTGRES_URL set in .env")

@@ -1,6 +1,5 @@
-from telebot import TeleBot
-
 from envs import ADMIN_ID, AUDIO_PATH, TG_TOKEN
+from telebot import TeleBot
 
 bot = TeleBot(TG_TOKEN)
 

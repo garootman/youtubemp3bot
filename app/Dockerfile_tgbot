@@ -1,0 +1,54 @@
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim-buster
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# install ffmpeg
+# RUN sudo apt-get install ffmpeg
+
+# Add the current directory contents into the container at /app
+ADD ./app /app
+
+# Arguments
+ARG POSTGRES_URL
+ARG REDIS_URL
+ARG REDIS_PASSWORD
+ARG TG_TOKEN
+ARG ADMIN_ID
+ARG PROXY_URL
+ARG ENV
+
+
+
+# Set arg as environment variable
+ENV POSTGRES_URL=$POSTGRES_URL
+ENV REDIS_URL=$REDIS_URL
+ENV REDIS_PASSWORD=$REDIS_PASSWORD
+ENV TG_TOKEN=$TG_TOKEN
+ENV ADMIN_ID=$ADMIN_ID
+ENV PROXY_URL=$PROXY_URL
+ENV ENV=$ENV
+
+
+
+# Copy pomidorlib into the temporary image
+# COPY ./app ./app
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
+
+CMD ["python", "/app/mybot.py"]
+
+# RUN pip install pytest
+# RUN pytest 
+# /app/tests
+
+
+
+# Run supervisord when the container launches
+# CMD celery -A worker worker --loglevel=info
+# WORKDIR /app/src
+# CMD celery -A worker worker --loglevel=info
+# CMD celery -A pomidorlib.worker worker --loglevel=info
+# CMD ["/usr/bin/supervisord"]

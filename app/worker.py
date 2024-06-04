@@ -3,9 +3,6 @@ import asyncio
 import os
 import time
 
-from telebot import TeleBot
-from telebot.types import InputMediaAudio
-
 from celery_config import celery_app
 from envs import (
     ADMIN_ID,
@@ -18,6 +15,8 @@ from envs import (
 )
 from models import SessionLocal, Task
 from mp3lib import split_audio
+from telebot import TeleBot
+from telebot.types import InputMediaAudio
 from ytlib import download_audio
 
 bot = TeleBot(TG_TOKEN)
