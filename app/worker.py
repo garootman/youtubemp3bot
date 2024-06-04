@@ -232,6 +232,12 @@ def rerun_failed_tasks():
 
 
 if __name__ == "__main__":
+    celery_app.worker_main(
+        argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
+    )
+
+
+if __name__ == "__somefun__":
     # read task_id from command line
     import sys
 

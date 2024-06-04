@@ -32,7 +32,9 @@ ENV ENV=$ENV
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
+# CMD to run worker ptyhon file
 CMD ["python", "/app/worker.py"]
+
 
 # RUN pip install pytest
 # RUN pytest 
