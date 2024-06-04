@@ -235,25 +235,7 @@ def rerun_failed_tasks():
         # rocess_task(task.id)
 
 
-"""
 if __name__ == "__main__":
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
     )
-"""
-
-# 6065e1a3
-
-if __name__ == "__main__":
-    # read task_id from command line
-    import sys
-
-    task_id = sys.argv[1] if len(sys.argv) > 1 else None
-    if not task_id:
-        print("No task_id provided, but i have these failed tasks:")
-        all_tasks = get_failed_tasks()
-        for t in all_tasks:
-            print(f"Task {t.id} created at {t.created_at}")
-        sys.exit(1)
-
-    process_task(task_id, cleanup=False)
