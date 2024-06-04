@@ -107,6 +107,9 @@ def mass_send_audio(chat_id, audio_list, mode, title):
                 audio=audio_object,
                 title=tit,
             )
+            print(
+                f"Sent audio chunk {i} of {len(audio_list)} to {chat_id}, sleeping 1 sec."
+            )
             time.sleep(1)
 
         except Exception as e:
@@ -130,7 +133,7 @@ def cleanup_files(audio_folder):
 
 
 @celery_app.task
-def process_task(task_id: str):
+def process_task(task_id: str, cleanup=True):
     print("called with task id", task_id)
 
     task = read_new_task(task_id)
@@ -181,7 +184,7 @@ def process_task(task_id: str):
             file_name, title = download_audio(task.url, task_id, AUDIO_PATH, PROXY_URL)
 
             local_files, std, err = split_audio(
-                file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT, False
+                file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT
             )
             if err:
                 raise ValueError(f"Error splitting files: {err}")
@@ -216,7 +219,8 @@ def process_task(task_id: str):
     db.add(task)
     db.commit()
     db.close()
-    cleanup_files(AUDIO_PATH)
+    if cleanup:
+        cleanup_files(AUDIO_PATH)
 
 
 @celery_app.task
@@ -231,13 +235,16 @@ def rerun_failed_tasks():
         # rocess_task(task.id)
 
 
+"""
 if __name__ == "__main__":
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
     )
+"""
 
+# 6065e1a3
 
-if __name__ == "__somefun__":
+if __name__ == "__main__":
     # read task_id from command line
     import sys
 
@@ -249,4 +256,4 @@ if __name__ == "__somefun__":
             print(f"Task {t.id} created at {t.created_at}")
         sys.exit(1)
 
-    process_task(task_id)
+    process_task(task_id, cleanup=False)
