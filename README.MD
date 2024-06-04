@@ -11,9 +11,7 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
-- bypass country\region lock
 - command to clear chat /clear!
-- docker pack + volume to save mp3 data
 - GH actions deploy
 - linting and stuff, bandit, mypy, docs, etc.
 - Multilanguage, message templates & stuff
@@ -21,6 +19,14 @@ Turns YT links to m4a audio files
 - follow popular channels, insta-download
 - subscriptions to yt channels + paid stuff
 - normal tests...
+
+## paid ideas
+
+- limis daily: number of downloads, 
+- split tracks for paid only
+- queue for multiple links + get playlist
+- following channels (subscription)
+- 
 
 ## License
 
