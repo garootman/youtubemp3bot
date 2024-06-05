@@ -11,17 +11,17 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
-- command to clear chat /clear!
+- Telebot send message error fix
 - GH actions deploy
+- correct file structure
 - linting and stuff, bandit, mypy, docs, etc.
 - Multilanguage, message templates & stuff
-- daily download limits by user \ chat
-- follow popular channels, insta-download
-- subscriptions to yt channels + paid stuff
-- normal tests...
+- normal testing
+- paid functionality
 
 ## paid ideas
 
+- add wallet payments
 - limis daily: number of downloads, 
 - split tracks for paid only
 - queue for multiple links + get playlist
