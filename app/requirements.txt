@@ -1,10 +1,9 @@
-aiogram==3.6.0
+aiogram==3.7.0
 celery==5.4.0
-pytest==8.2.0
+pyTelegramBotAPI==4.19.0
+pytest==8.0.2
 python-dotenv==1.0.1
-pyTelegramBotAPI==4.17.0
-redis==5.0.4
+redis==5.0.5
 SQLAlchemy==2.0.30
+yt_dlp==2024.5.27
 psycopg2-binary==2.9.9
-pydub==0.25.1
-yt_dlp==2024.4.9

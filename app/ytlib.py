@@ -4,22 +4,14 @@ import time
 from assist import new_id, now
 from retry import retry
 from yt_dlp import YoutubeDL
+from ytdlp_config import DOWNLOAD_OPTIONS, GETINFO_OPTIONS
 
 
 @retry()
 def get_video_info(url):
-    ydl_opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "skip_download": True,
-        "format": "best",
-    }
-    with YoutubeDL(ydl_opts) as ydl:
-        try:
-            info = ydl.extract_info(url, download=False)
-            return info, ""
-        except Exception as e:
-            return None, str(e)
+    with YoutubeDL(GETINFO_OPTIONS) as ydl:
+        info = ydl.extract_info(url, download=False)
+        return info
 
 
 @retry()
@@ -27,15 +19,8 @@ def download_audio(url, task_id, folder, proxy=None):
     stt = now(True)
     filepath = f"{folder}/{task_id}.m4a"
 
-    ydl_opts = {
-        "format": "bestaudio[ext=m4a]/bestaudio",
-        "outtmpl": f"{folder}/{task_id}.m4a",
-        "bypass_geoblock": True,
-        "quiet": True,
-        "noplaylist": True,
-        "geo_bypass": True,
-        "no_warnings": True,  # silent mode
-    }
+    ydl_opts = DOWNLOAD_OPTIONS.copy()
+    ydl_opts["outtmpl"] = filepath
     if proxy:
         ydl_opts["proxy"] = proxy
 
