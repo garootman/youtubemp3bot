@@ -11,6 +11,7 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
+- save audio duration to DB
 - Telebot send message error fix
 - GH actions deploy
 - correct file structure
