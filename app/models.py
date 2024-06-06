@@ -30,6 +30,7 @@ class Task(Base):
     status = Column(String(20), default="NEW")
     yt_id = Column(String(20), nullable=False)
     yt_title = Column(String(256), default="")
+    yt_duration = Column(BigInteger, default=0)
     tg_file_id = Column(TEXT, default="")
     url = Column(TEXT, default="")
     error = Column(TEXT, default="")

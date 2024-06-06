@@ -69,7 +69,6 @@ async def msg_handler(message: Message) -> None:
         await message.reply(no_yt_links)
         return
 
-    # add a task to database
     db = SessionLocal()
     task = Task(
         user_id=message.from_user.id, msg_text=message.text, url=url, yt_id="no_yt_id"

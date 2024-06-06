@@ -14,7 +14,6 @@ def utcnow(microseconds=False):
 
 
 def now(microseconds=False):
-    # returns utctimestamp INT
     nn = int(datetime.now().timestamp() * 1000)
     if not microseconds:
         return nn // 1000 * 1000
@@ -52,7 +51,8 @@ def universal_check_link(link):
         r"http(?:s?)://(?:www\.)?youtube\.com/embed/",
         r"http(?:s?)://(?:www\.)?youtube\.com/v/",
         r"http(?:s?)://(?:www\.)?youtube\.com/live/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/playlist\?list=",
+        #        r"http(?:s?)://(?:www\.)?youtube\.com/playlist\?list=",
+        # palylists are excluded by now
         r"http(?:s?)://(?:www\.)?youtube\.com/shorts/",
         r"http(?:s?)://(?:www\.)?youtube\.com/channel/",
         r"http(?:s?)://(?:www\.)?youtube\.com/user/",
@@ -66,10 +66,3 @@ def universal_check_link(link):
         if match:
             return True
     return False
-
-
-if __name__ == "__main__":
-    x = universal_check_link(
-        "https://www.youtube.com/live/ePqjCJAQ3yY?si=uejx2Iw5vOp0agLW"
-    )
-    print(x)

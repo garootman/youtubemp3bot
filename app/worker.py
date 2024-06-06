@@ -15,6 +15,7 @@ from envs import (
 )
 from models import SessionLocal, Task
 from mp3lib import split_audio
+from retry import retry
 from telebot import TeleBot
 from telebot.types import InputMediaAudio
 from ytlib import download_audio
@@ -35,6 +36,12 @@ def get_failed_tasks():
     tasks = db.query(Task).filter(Task.status == "ERROR").all()
     db.close()
     return tasks
+
+
+@retry()
+def send_msg(*args, **kwargs):
+    # universdal fnc to wrap send msg
+    return bot.send_message(*args, **kwargs)
 
 
 def lookup_same_url(url):
@@ -80,7 +87,8 @@ def mass_send_audio_album(chat_id, audio_list, mode):
                 media.append(None)
 
         try:
-            sent_messages = bot.send_media_group(chat_id=chat_id, media=media)
+            # sent_messages = bot.send_media_group(chat_id=chat_id, media=media)
+            sent_messages = send_msg(chat_id=chat_id, media=media)
             sent.extend(sent_messages)
             time.sleep(1)
         except Exception as e:
@@ -140,40 +148,21 @@ def process_task(task_id: str, cleanup=True):
     if not task:  # or task.status != "NEW":
         print("No task found or task is not new")
         return
-    # file_name = AUDIO_PATH + task.yt_id + ".mp3"
     done_task = lookup_same_url(task.url)
 
     x = []
     dlmsg = None
     error = ""
     title = "unknown"
+    duration = 0
 
     if done_task:
         print(f"Found same yt_id in DB: task_id={done_task.id}")
-        # caption = caption_template.format(done_task.yt_title)
-        # title = done_task.yt_title
         x = mass_send_audio(
             task.user_id, done_task.tg_file_id.split(","), "MEDIA", done_task.yt_title
         )
 
-    # list corresponding files in AUDIO_PATH, if they are less than MAX_FILE_SIZE
-    """
-    local_files = [
-        os.path.join(AUDIO_PATH, file)
-        for file in os.listdir(AUDIO_PATH)
-        if file.startswith(task.yt_id)
-        and os.path.getsize(os.path.join(AUDIO_PATH, file)) <= MAX_FILE_SIZE
-    ]
-    
-    if not x and done_task and local_files:
-        print(
-            f"Sending {len(local_files)} audio files from disk for yt_id: {task.yt_id}"
-        )
-        x = []
-        x = mass_send_audio(task.user_id, local_files, "FILE")
-    """
-
-    dlmsg = bot.send_message(
+    dlmsg = send_msg(
         chat_id=task.user_id,
         text="Downloading video. For large files it may take a while, please wait.",
     )
@@ -181,7 +170,9 @@ def process_task(task_id: str, cleanup=True):
     if not x:
         print(f"Downloading audio for url: {task.url}")
         try:
-            file_name, title = download_audio(task.url, task_id, AUDIO_PATH, PROXY_URL)
+            file_name, title, duration = download_audio(
+                task.url, task_id, AUDIO_PATH, PROXY_URL
+            )
 
             local_files, std, err = split_audio(
                 file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT
@@ -204,16 +195,14 @@ def process_task(task_id: str, cleanup=True):
         task.status = "COMPLETE"
         task.tg_file_id = file_media_ids
         task.yt_title = title
+        task.yt_duration = duration
     else:
         task.status = "ERROR"
-        bot.send_message(
-            chat_id=task.user_id, text="Error sending voice, try again later"
-        )
-        bot.send_message(
+        send_msg(chat_id=task.user_id, text="Error sending voice, try again later")
+        send_msg(
             chat_id=ADMIN_ID, text=f"Error sending msg for task {task_id}: {error}"
         )
 
-    # save updated task to DB
     task.error = error
     db = SessionLocal()
     db.add(task)

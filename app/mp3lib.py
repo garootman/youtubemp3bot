@@ -3,8 +3,10 @@ import os
 import subprocess
 
 from assist import now
+from retry import retry
 
 
+@retry()
 def split_audio(filepath, chunklenstr, file_size, timeout):
     if os.path.getsize(filepath) <= file_size:
         return [filepath], "", ""
