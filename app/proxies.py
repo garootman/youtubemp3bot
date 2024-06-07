@@ -8,8 +8,8 @@ if USE_PROXY == "LOCALHOST":
     PROXIES = [LOCAL_PROXY_URL]
 elif USE_PROXY:
     # if .proxylist.txt exists, read it and use the proxies from there
-    if os.path.exists(".proxylist.txt"):
-        with open(".proxylist.txt", "r") as f:
+    if os.path.exists(".proxylist.env"):
+        with open(".proxylist.env", "r") as f:
             PROXIES = f.read().splitlines()
             PROXIES = [p.strip() for p in PROXIES if p]
 
