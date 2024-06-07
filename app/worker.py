@@ -245,13 +245,14 @@ def rerun_failed_tasks():
         # rocess_task(task.id)
 
 
-if __name__ == "__ma11in__":
+if __name__ == "__main__":
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
     )
 
-
-if __name__ == "__main__":
+"""
+if __name__ == "__ma11in__":
     # run task with task_id
     task_id = "b8e7e4e7"
     process_task(task_id)
+"""
