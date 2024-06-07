@@ -1,15 +1,17 @@
+import os
 import random
 
 from envs import LOCAL_PROXY_URL, USE_PROXY
 
+PROXIES = []
 if USE_PROXY == "LOCALHOST":
     PROXIES = [LOCAL_PROXY_URL]
 elif USE_PROXY:
-    with open(".proxylist.txt", "r") as f:
-        PROXIES = f.read().splitlines()
-        PROXIES = [p.strip() for p in PROXIES if p]
-else:
-    PROXIES = []
+    # if .proxylist.txt exists, read it and use the proxies from there
+    if os.path.exists(".proxylist.txt"):
+        with open(".proxylist.txt", "r") as f:
+            PROXIES = f.read().splitlines()
+            PROXIES = [p.strip() for p in PROXIES if p]
 
 
 class ProxyRevolver:
