@@ -66,7 +66,7 @@ async def delete_chat_history(message: Message, state: FSMContext) -> None:
 
 
 @form_router.message(Command("subscribe"))
-async def delete_chat_history(message: Message, state: FSMContext) -> None:
+async def payment_command_handler(message: Message, state: FSMContext) -> None:
     # gives a link to make payment
     # switches to payment state
     msg = (
