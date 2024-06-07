@@ -190,7 +190,7 @@ def process_task(task_id: str, cleanup=True):
         print(f"Downloading audio for url: {task.url}")
         try:
             proxy_url = proxy_mgr.get_proxy()
-            print ("Using proxy: ", proxy_url)
+            print("Using proxy: ", proxy_url)
             file_name, title, duration = download_audio(
                 task.url, task_id, AUDIO_PATH, proxy_url
             )
