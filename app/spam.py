@@ -51,6 +51,7 @@ def send_upd_messages(ids, tg_message_txt, only_admin=True):
         try:
             bot.send_message(chat_id=user_tg_id, text=tg_message_txt)
             time.sleep(5)
+            print(f"Sent message to {user_tg_id}")
             sent += 1
         except Exception as e:
             errors += 1
