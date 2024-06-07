@@ -180,3 +180,4 @@ app/test.db
 app/test.db
 app/cookies.txt
 app/.proxylist.txt
+app/.proxylist.env
