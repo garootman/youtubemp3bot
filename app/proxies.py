@@ -26,7 +26,6 @@ class ProxyRevolver:
         for proxy in proxies:
             http_proxy = self._proxy_url_to_http_syntax(proxy)
             if http_proxy:
-                print(f"Added proxy {http_proxy}")
                 http_syntax_proxies.append(http_proxy)
             else:
                 print(f"Invalid proxy format: {proxy}")

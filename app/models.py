@@ -44,6 +44,21 @@ class Task(Base):
         return f"TG Task: {self.id} {self.status} from {self.updated_at}: tyid {self.yt_id}, msg: {plainstring(self.msg_text)}"
 
 
+class Payment(Base):
+    # a class to store payment details
+    # payment consists of a  payment_id, user_id, amount_usd, status, method, created_at, valid_till, updated_at, comment
+    __tablename__ = "payments"
+    id = Column(String(20), primary_key=True, index=True, default=new_id)
+    user_id = Column(BigInteger, nullable=False)
+    amount_usd = Column(Float, nullable=False)
+    status = Column(String(20), default="PAID")
+    method = Column(String(20), default="")
+    created_at = Column(DateTime, default=utcnow, nullable=False)
+    valid_till = Column(DateTime, default=utcnow, nullable=False)
+    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
+    comment = Column(TEXT, default="")
+
+
 def get_db():
     db = SessionLocal()
     try:

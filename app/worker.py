@@ -13,10 +13,11 @@ from envs import (
     MAX_FILE_SIZE,
     TG_TOKEN,
 )
-from models import SessionLocal, Task
+from models import Payment, SessionLocal, Task
 from mp3lib import split_audio
 from proxies import proxy_mgr
 from retry import retry
+from sqlalchemy import or_
 from telebot import TeleBot
 from telebot.types import InputMediaAudio
 from ytlib import download_audio
@@ -133,10 +134,11 @@ def mass_send_audio(chat_id, audio_list, mode, title):
     return sent
 
 
-def cleanup_files(audio_folder):
-    # deletes all m4a files in audio_folder
+def cleanup_files(audio_folder, filename_chunk):
+    # deletes files in audio_folder, that have filename_chunk in filename
     for file in os.listdir(audio_folder):
-        if file.lower().endswith("m4a"):
+        if filename_chunk in file:
+            # if file.lower().endswith("m4a"):
             filepath = os.path.join(audio_folder, file)
             os.remove(filepath)
 
@@ -147,13 +149,35 @@ def get_user_usage(chat_id, hours_ago):
     user_succ_tasks = (
         db.query(Task)
         .filter(Task.user_id == chat_id)
-        .filter(Task.status == "COMPLETE")
+        .filter(Task.status.in_(["COMPLETE", "NEW"]))
         .filter(Task.repeat == False)
         .filter(Task.created_at >= utcnow() - timedelta(hours=hours_ago))
         .all()
     )
     db.close()
     return user_succ_tasks
+
+
+def get_user_subscribed(chat_id):
+    # returns user subscription status
+    # checks if user has a payment with status PAID
+    # checks if payment date + 1 month is in the future
+    # returns date of subscription expiration, None otherwise
+    db = SessionLocal()
+    user_subscribed = (
+        db.query(Payment).filter(Payment.user_id == chat_id)
+        # .filter(Payment.status == "PAID")
+        # .filter(Payment.valid_till >= utcnow())
+        .first()
+    )
+    db.close()
+    if user_subscribed:
+        print(utcnow())
+        print(
+            f"User {chat_id} is subscribed until {user_subscribed.valid_till}, status: {user_subscribed.status}, amount: {user_subscribed.amount_usd}"
+        )
+        return user_subscribed.valid_till
+    return None
 
 
 @celery_app.task
@@ -230,7 +254,7 @@ def process_task(task_id: str, cleanup=True):
     db.commit()
     db.close()
     if cleanup:
-        cleanup_files(AUDIO_PATH)
+        cleanup_files(AUDIO_PATH, task_id)
 
 
 @celery_app.task

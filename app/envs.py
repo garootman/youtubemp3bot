@@ -52,13 +52,12 @@ if ENV.lower() == "dev":
     print("Running in dev mode")
     POSTGRES_URL = "sqlite:///./test.db"
     REDIS_URL = "redis://localhost:6379/0"
-
-elif ENV.lower() == "test":
-    print("Running in TEST mode")
-    POSTGRES_URL = "postgresql://postgres:postgres@localhost:22432/tgytmp3"
-    REDIS_URL = "redis://:XP9Dg3BhtJ@localhost:22379/1"
 else:
     print("Running in PROD mode:", ENV)
 
+
+PAY_LINK = os.getenv("PAY_LINK", "")
+if not PAY_LINK:
+    raise ValueError("No PAY_LINK set in .env")
 
 print(".env read successfully")
