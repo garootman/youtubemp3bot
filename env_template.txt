@@ -17,7 +17,10 @@ POSTGRES_PORT=
 POSTGRES_URL=
 
 ENV=PROD
-PROXY_URL=
+
+USE_PROXY= # YES | LOCALHOST | NO (empty)
+# http://localhost:8888 | (empty) | https://proxybroker2:8888 
+LOCAL_PROXY_URL=
 
 NETWORK_NAME=default
 

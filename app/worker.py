@@ -11,11 +11,11 @@ from envs import (
     DURATION_STR,
     FFMPEG_TIMEOUT,
     MAX_FILE_SIZE,
-    PROXY_URL,
     TG_TOKEN,
 )
 from models import SessionLocal, Task
 from mp3lib import split_audio
+from proxies import proxy_mgr
 from retry import retry
 from telebot import TeleBot
 from telebot.types import InputMediaAudio
@@ -189,8 +189,9 @@ def process_task(task_id: str, cleanup=True):
     if not x:
         print(f"Downloading audio for url: {task.url}")
         try:
+            proxy_url = proxy_mgr.get_proxy()
             file_name, title, duration = download_audio(
-                task.url, task_id, AUDIO_PATH, PROXY_URL
+                task.url, task_id, AUDIO_PATH, proxy_url
             )
 
             local_files, std, err = split_audio(
@@ -244,7 +245,13 @@ def rerun_failed_tasks():
         # rocess_task(task.id)
 
 
-if __name__ == "__main__":
+if __name__ == "__ma11in__":
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
     )
+
+
+if __name__ == "__main__":
+    # run task with task_id
+    task_id = "b8e7e4e7"
+    process_task(task_id)
