@@ -3,6 +3,7 @@ import asyncio
 import os
 import time
 
+from assist import timedelta, utcnow
 from celery_config import celery_app
 from envs import (
     ADMIN_ID,
@@ -140,6 +141,21 @@ def cleanup_files(audio_folder):
             os.remove(filepath)
 
 
+def get_user_usage(chat_id, hours_ago):
+    # returns quantity of bot uses
+    db = SessionLocal()
+    user_succ_tasks = (
+        db.query(Task)
+        .filter(Task.user_id == chat_id)
+        .filter(Task.status == "COMPLETE")
+        .filter(Task.repeat == False)
+        .filter(Task.created_at >= utcnow() - timedelta(hours=hours_ago))
+        .all()
+    )
+    db.close()
+    return user_succ_tasks
+
+
 @celery_app.task
 def process_task(task_id: str, cleanup=True):
     print("called with task id", task_id)
@@ -155,12 +171,15 @@ def process_task(task_id: str, cleanup=True):
     error = ""
     title = "unknown"
     duration = 0
+    repeat = False
 
     if done_task:
         print(f"Found same yt_id in DB: task_id={done_task.id}")
         x = mass_send_audio(
             task.user_id, done_task.tg_file_id.split(","), "MEDIA", done_task.yt_title
         )
+        if x:
+            repeat = True
 
     dlmsg = send_msg(
         chat_id=task.user_id,
@@ -196,6 +215,7 @@ def process_task(task_id: str, cleanup=True):
         task.tg_file_id = file_media_ids
         task.yt_title = title
         task.yt_duration = duration
+        task.repeat = repeat
     else:
         task.status = "ERROR"
         send_msg(chat_id=task.user_id, text="Error sending voice, try again later")

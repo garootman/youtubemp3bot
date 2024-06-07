@@ -21,6 +21,10 @@ if not ADMIN_ID:
     raise ValueError("No ADMIN_ID set in .env")
 
 
+USAGE_TIMEDELTA_HOURS = int(os.getenv("USAGE_TIMEDELTA_HOURS", 24))
+USAGE_PERIODIC_LIMIT = int(os.getenv("USAGE_PERIODIC_LIMIT", 10))
+
+
 POSTGRES_URL = os.getenv("POSTGRES_URL")
 if not POSTGRES_URL:
     raise ValueError("No POSTGRES_URL set in .env")

@@ -14,15 +14,23 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from assist import extract_urls, universal_check_link
-from envs import ADMIN_ID, AUDIO_PATH, TG_TOKEN
+from envs import (
+    ADMIN_ID,
+    AUDIO_PATH,
+    TG_TOKEN,
+    USAGE_PERIODIC_LIMIT,
+    USAGE_TIMEDELTA_HOURS,
+)
 from models import SessionLocal, Task, get_db, session_scope
-from worker import process_task
+from worker import get_user_usage, process_task
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
 no_yt_links = "No youtube links found in the message"
 doing_job = "Processing video..."
 feedback_msg = "Your next message will be sent to the feedback chat admin."
 feedback_done = "Feedback sent to admin chat"
+usage_exceeded = "Sorry, you have reached the limit of {} uses per {} hours."
+task_added = "Task added\nYou have {} uses left in this {} hours period."
 
 form_router = Router()
 
@@ -69,6 +77,13 @@ async def msg_handler(message: Message) -> None:
         await message.reply(no_yt_links)
         return
 
+    user_usage = get_user_usage(message.from_user.id, USAGE_TIMEDELTA_HOURS)
+    if len(user_usage) >= USAGE_PERIODIC_LIMIT:
+        await message.answer(
+            usage_exceeded.format(USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS)
+        )
+        return
+
     db = SessionLocal()
     task = Task(
         user_id=message.from_user.id, msg_text=message.text, url=url, yt_id="no_yt_id"
@@ -78,6 +93,11 @@ async def msg_handler(message: Message) -> None:
     process_task.delay(task.id)
     print(f"Task {task.id} added, url: {url}")
     db.close()
+
+    await message.answer(
+        task_added.format(USAGE_PERIODIC_LIMIT - len(user_usage), USAGE_TIMEDELTA_HOURS)
+    )
+
     return
 
 

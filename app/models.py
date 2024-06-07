@@ -6,6 +6,7 @@ from envs import POSTGRES_URL
 from sqlalchemy import (
     TEXT,
     BigInteger,
+    Boolean,
     Column,
     DateTime,
     Float,
@@ -24,7 +25,6 @@ class Task(Base):
     __tablename__ = "tasks"
     id = Column(String(20), primary_key=True, index=True, default=new_id)
     user_id = Column(BigInteger, nullable=False)
-
     created_at = Column(DateTime, default=utcnow, nullable=False)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
     status = Column(String(20), default="NEW")
@@ -35,6 +35,7 @@ class Task(Base):
     url = Column(TEXT, default="")
     error = Column(TEXT, default="")
     msg_text = Column(TEXT, default="")
+    repeat = Column(Boolean, default=False)
 
     def __repr__(self):
         return f"<Task {self.id} {self.status} {self.yt_id}>"
