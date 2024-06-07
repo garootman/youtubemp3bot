@@ -36,6 +36,8 @@ def download_audio(url, task_id, folder, proxy=None):
 
 if __name__ == "__main__":
     # Test the download_audio function + duration
+    from envs import PROXY_URL
+
     stream_url = "https://www.youtube.com/live/Dv1s15JAAsM?si=BhvL3NUIuhxoEDQx"
-    p, t, d = download_audio(stream_url, new_id(), "./audios", proxy=None)
+    p, t, d = download_audio(stream_url, new_id(), "./audios", proxy=PROXY_URL)
     print(p, t, d)

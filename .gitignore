@@ -6,6 +6,7 @@ __pycache__/
 # C extensions
 *.so
 
+**/cookies.txt
 
 *.mp3
 *.mp4
@@ -177,3 +178,4 @@ app/test.db
 app/test.db
 app/test.db
 app/test.db
+app/cookies.txt
