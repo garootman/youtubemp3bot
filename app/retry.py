@@ -6,7 +6,7 @@ from functools import wraps
 from assist import now
 
 
-def retry(max_retries=3, delay=1, outfunc=print, raise_exception=True):
+def retry(max_retries=3, delay=1, outfunc=print):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -24,8 +24,8 @@ def retry(max_retries=3, delay=1, outfunc=print, raise_exception=True):
                     outfunc(msg)
                     last_exception = e
                     time.sleep(delay)
-            if raise_exception:
-                raise last_exception
+
+            raise last_exception
 
         return wrapper
 
