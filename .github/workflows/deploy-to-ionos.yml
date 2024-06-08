@@ -16,9 +16,16 @@ jobs:
     - name: Copy .env file
       run: |
         cp /home/gituser/env_files/ytbot.env ./.env
+        cp /home/gituser/env_files/ytbot_proxies.txt ./app/.proxylist.env
+        
 
 
-
-    - name: Build and run Docker Compose
+    - name: Build Docker Compose services
       run: |
-        docker compose -f ./docker-compose.yml up -d --build
+        sudo docker-compose -f ./docker-compose.yml build
+
+
+    - name: Run Docker Compose services
+      run: |
+        sudo docker-compose -f ./docker-compose.yml up -d
+
