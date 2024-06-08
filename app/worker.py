@@ -2,8 +2,9 @@
 import asyncio
 import os
 import time
+from datetime import timedelta
 
-from assist import timedelta, utcnow
+from assist import utcnow
 from celery_config import celery_app
 from envs import (
     ADMIN_ID,
