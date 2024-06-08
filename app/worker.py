@@ -4,6 +4,10 @@ import os
 import time
 from datetime import timedelta
 
+from sqlalchemy import or_
+from telebot import TeleBot
+from telebot.types import InputMediaAudio
+
 from assist import utcnow
 from celery_config import celery_app
 from envs import (
@@ -11,18 +15,32 @@ from envs import (
     AUDIO_PATH,
     DURATION_STR,
     FFMPEG_TIMEOUT,
+    LOCAL_PROXY_URL,
     MAX_FILE_SIZE,
     TG_TOKEN,
+    USE_PROXY,
 )
 from models import Payment, SessionLocal, Task
 from mp3lib import split_audio
-from proxies import proxy_mgr
+from proxies import ProxyRevolver
 from retry import retry
-from sqlalchemy import or_
-from telebot import TeleBot
-from telebot.types import InputMediaAudio
 from ytlib import download_audio
 
+
+def get_proxies():
+    if USE_PROXY == "LOCALHOST":
+        return [LOCAL_PROXY_URL]
+    elif USE_PROXY:
+        if os.path.exists(USE_PROXY):
+            with open(USE_PROXY) as f:
+                return f.readlines()
+        else:
+            print(f"Proxy file {USE_PROXY} not found")
+
+    return []
+
+
+proxy_mgr = ProxyRevolver(get_proxies())
 bot = TeleBot(TG_TOKEN)
 
 
@@ -214,7 +232,7 @@ def process_task(task_id: str, cleanup=True):
     if not x:
         print(f"Downloading audio for url: {task.url}")
         try:
-            proxy_url = proxy_mgr.get_proxy()
+            proxy_url = proxy_mgr.get_checked_proxy()
             print("Using proxy: ", proxy_url)
             file_name, title, duration = download_audio(
                 task.url, task_id, AUDIO_PATH, proxy_url

@@ -40,7 +40,6 @@ if not REDIS_PASSWORD:
 
 USE_PROXY = os.getenv("USE_PROXY", "")
 if USE_PROXY:
-    USE_PROXY = USE_PROXY.strip().upper()
     print("Using proxies param:", USE_PROXY)
 
 LOCAL_PROXY_URL = os.getenv("LOCAL_PROXY_URL", "http://localhost:8888")

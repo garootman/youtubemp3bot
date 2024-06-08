@@ -11,7 +11,6 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
-- GH actions deploy
 - after-deploy mechanics: exec tasks, ?
 - 3 days unlim for ACTIONS (hamster, clicks, following, etc)
 - Telegram payments: starts and \ or wallet

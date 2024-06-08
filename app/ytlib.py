@@ -1,9 +1,10 @@
 import os
 import time
 
+from yt_dlp import YoutubeDL
+
 from assist import new_id, now
 from retry import retry
-from yt_dlp import YoutubeDL
 from ytdlp_config import DOWNLOAD_OPTIONS, GETINFO_OPTIONS
 
 
