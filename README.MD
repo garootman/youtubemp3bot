@@ -11,12 +11,13 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
-- 3 days unlim for ACTIONS ()hamster, clicks, following, etc)
+- GH actions deploy
+- after-deploy mechanics: exec tasks, ?
+- 3 days unlim for ACTIONS (hamster, clicks, following, etc)
 - Telegram payments: starts and \ or wallet
 - Other platforms: VK, TikTok, etc - all from YTlib
 - Normal messaging + comm with admin + multilang
 - Correct SOLID class structure and project file structure
-- GH actions deploy
 - Testing: unit, integro, functional
 - Monitoring: regular ping, staistics
 - linting and stuff, bandit, mypy, docs, etc.
