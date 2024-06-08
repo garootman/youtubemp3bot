@@ -11,23 +11,21 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
-- save audio duration to DB
-- Telebot send message error fix
+- 3 days unlim for ACTIONS ()hamster, clicks, following, etc)
+- Telegram payments: starts and \ or wallet
+- Other platforms: VK, TikTok, etc - all from YTlib
+- Normal messaging + comm with admin + multilang
+- Correct SOLID class structure and project file structure
 - GH actions deploy
-- correct file structure
+- Testing: unit, integro, functional
+- Monitoring: regular ping, staistics
 - linting and stuff, bandit, mypy, docs, etc.
-- Multilanguage, message templates & stuff
-- normal testing
-- paid functionality
 
-## paid ideas
+## Subscription updates
 
-- add wallet payments
-- limis daily: number of downloads, 
-- split tracks for paid only
-- queue for multiple links + get playlist
-- following channels (subscription)
-- 
+- paid user track queue - more than 1 track in queue for paid users 
+- limit file size - 50 MB for unpaid users, unlimited for paid
+- get playlist for paid only
 
 ## License
 
