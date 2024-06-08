@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Copy .env file
+      run: |
+        cp /home/gituser/env_files/ytbot.env ./.env
+
+
+
+    - name: Build and run Docker Compose
+      run: |
+        docker-compose -f ./docker-compose.yml pull
+        docker-compose -f ./docker-compose.yml up -d --build
