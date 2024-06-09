@@ -40,4 +40,3 @@ def create_db():
     Base.metadata.create_all(bind=engine)
     print("DB + tables created successfully at", POSTGRES_URL)
 
-create_db()
