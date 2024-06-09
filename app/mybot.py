@@ -14,7 +14,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from assist import extract_platform, extract_urls, extract_youtube_info, utcnow
-from database import Base, SessionLocal, Task, engine, session_scope
+from database import Base, SessionLocal, Task, create_db, engine, session_scope
 from envs import (
     ADMIN_ID,
     AUDIO_PATH,
@@ -27,7 +27,9 @@ from paywall import AccessControlService
 from worker import process_task
 
 db = SessionLocal()
-Base.metadata.create_all(bind=engine)
+create_db()
+# Base.metadata.create_all(bind=engine)
+
 
 uacs = AccessControlService(db, USAGE_TIMEDELTA_HOURS, USAGE_PERIODIC_LIMIT)
 

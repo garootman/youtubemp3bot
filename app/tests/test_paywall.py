@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import pytest
 from assist import utcnow
-from database import Base, Payment, create_db
+from database import Base, Payment
 from paywall import PaywallService
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

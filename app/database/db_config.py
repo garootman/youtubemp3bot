@@ -36,7 +36,6 @@ def session_scope():
         session.close()
 
 
-def create_db():
-    Base.metadata.create_all(bind=engine)
+def create_db(base=Base, engine=engine):
+    Base.metadata.create_all(engine)
     print("DB + tables created successfully at", POSTGRES_URL)
-

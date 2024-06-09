@@ -60,6 +60,7 @@ def get_failed_tasks():
     db.close()
     return tasks
 
+
 def get_new_tasks():
     db = SessionLocal()
     # get all tasks with status new
