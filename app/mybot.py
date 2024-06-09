@@ -27,7 +27,7 @@ from paywall import AccessControlService
 from worker import process_task
 
 db = SessionLocal()
-Base.metadata.create_all(engine)
+Base.metadata.create_all(bind=engine)
 
 uacs = AccessControlService(db, USAGE_TIMEDELTA_HOURS, USAGE_PERIODIC_LIMIT)
 
