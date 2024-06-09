@@ -7,3 +7,5 @@ redis==5.0.5
 SQLAlchemy==2.0.30
 yt_dlp==2024.5.27
 psycopg2-binary==2.9.9
+isodate==0.6.1
+

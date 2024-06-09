@@ -1,7 +1,6 @@
 from celery import Celery
 from celery.schedules import crontab, timedelta
 from celery.signals import worker_ready
-
 from envs import REDIS_URL
 
 celery_app = Celery("worker", broker=REDIS_URL, backend=REDIS_URL)

@@ -1,30 +1,31 @@
 # separate file for sending results to user
-import asyncio
 import os
 import time
 from datetime import timedelta
 
-from sqlalchemy import or_
-from telebot import TeleBot
-from telebot.types import InputMediaAudio
-
-from assist import utcnow
+from assist import retry, utcnow
 from celery_config import celery_app
+from database import Payment, SessionLocal, Task
 from envs import (
     ADMIN_ID,
     AUDIO_PATH,
     DURATION_STR,
     FFMPEG_TIMEOUT,
+    GOOGLE_API_KEY,
     LOCAL_PROXY_URL,
     MAX_FILE_SIZE,
     TG_TOKEN,
     USE_PROXY,
 )
-from models import Payment, SessionLocal, Task
-from mp3lib import split_audio
+from medialib import YouTubeAPIClient, download_audio
 from proxies import ProxyRevolver
-from retry import retry
-from ytlib import download_audio
+from splitter import delete_files_by_chunk, delete_small_files, split_audio
+from sqlalchemy import or_
+from telebot import TeleBot
+from telebot.types import InputMediaAudio
+
+if not os.path.exists(AUDIO_PATH):
+    os.makedirs(AUDIO_PATH)
 
 
 def get_proxies():
@@ -42,6 +43,7 @@ def get_proxies():
 
 proxy_mgr = ProxyRevolver(get_proxies())
 bot = TeleBot(TG_TOKEN)
+yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
 
 
 def read_new_task(task_id):
@@ -72,6 +74,26 @@ def lookup_same_url(url):
     task = (
         db.query(Task)
         .filter(Task.url == url, Task.status == "COMPLETE", Task.tg_file_id != "")
+        .order_by(Task.updated_at.desc())
+        .first()
+    )
+    db.close()
+    return task
+
+
+def lookup_same_media(paltform, media_type, media_id):
+    # find task with same paltform, media_type, media_id
+    # that is complete and has a tg_file_id
+    # select one with the latest timestamp in updated_at
+    db = SessionLocal()
+    task = (
+        db.query(Task)
+        .filter(
+            Task.paltform == paltform,
+            Task.media_type == media_type,
+            Task.media_id == media_id,
+            Task.status == "COMPLETE",
+        )
         .order_by(Task.updated_at.desc())
         .first()
     )
@@ -153,97 +175,76 @@ def mass_send_audio(chat_id, audio_list, mode, title):
     return sent
 
 
-def cleanup_files(audio_folder, filename_chunk):
-    # deletes files in audio_folder, that have filename_chunk in filename
-    for file in os.listdir(audio_folder):
-        if filename_chunk in file:
-            # if file.lower().endswith("m4a"):
-            filepath = os.path.join(audio_folder, file)
-            os.remove(filepath)
-
-
-def get_user_usage(chat_id, hours_ago):
-    # returns quantity of bot uses
-    db = SessionLocal()
-    user_succ_tasks = (
-        db.query(Task)
-        .filter(Task.user_id == chat_id)
-        .filter(Task.status.in_(["COMPLETE", "NEW"]))
-        .filter(Task.repeat == False)
-        .filter(Task.created_at >= utcnow() - timedelta(hours=hours_ago))
-        .all()
-    )
-    db.close()
-    return user_succ_tasks
-
-
-def get_user_subscribed(chat_id):
-    # returns user subscription status
-    # checks if user has a payment with status PAID
-    # checks if payment date + 1 month is in the future
-    # returns date of subscription expiration, None otherwise
-    db = SessionLocal()
-    user_subscribed = (
-        db.query(Payment).filter(Payment.user_id == chat_id)
-        # .filter(Payment.status == "PAID")
-        # .filter(Payment.valid_till >= utcnow())
-        .first()
-    )
-    db.close()
-    if user_subscribed:
-        print(utcnow())
-        print(
-            f"User {chat_id} is subscribed until {user_subscribed.valid_till}, status: {user_subscribed.status}, amount: {user_subscribed.amount_usd}"
-        )
-        return user_subscribed.valid_till
-    return None
-
-
 @celery_app.task
 def process_task(task_id: str, cleanup=True):
-    print("called with task id", task_id)
-
+    print("Worker called with task id", task_id)
     task = read_new_task(task_id)
-    if not task:  # or task.status != "NEW":
-        print("No task found or task is not new")
-        return
-    done_task = lookup_same_url(task.url)
+    done_task = lookup_same_media(task.paltform, task.media_type, task.media_id)
 
     x = []
     dlmsg = None
     error = ""
     title = "unknown"
+    channel = "unknown"
     duration = 0
+    filesize = 0
     repeat = False
+    countries_yes = []
+    countries_no = []
 
     if done_task:
-        print(f"Found same yt_id in DB: task_id={done_task.id}")
+        print(f"Found same media in DB: task_id={done_task.id}")
         x = mass_send_audio(
-            task.user_id, done_task.tg_file_id.split(","), "MEDIA", done_task.yt_title
+            task.chat_id, done_task.tg_file_id.split(","), "MEDIA", done_task.title
         )
         if x:
             repeat = True
-
-    dlmsg = send_msg(
-        chat_id=task.user_id,
-        text="Downloading video. For large files it may take a while, please wait.",
-    )
+            title = done_task.title
+            channel = done_task.channel
+            duration = done_task.duration
+            countries_yes = done_task.countries_yes
+            countries_no = done_task.countries_no
+            filesize = done_task.filesize
 
     if not x:
-        print(f"Downloading audio for url: {task.url}")
+        title, channel, duration = None, None, 0
+        dlmsg = send_msg(
+            chat_id=task.chat_id,
+            text="Downloading video. For large files it may take a while, please wait.",
+        )
+
+        print(
+            f"Downloading audio for url: {task.url}, type: {task.media_type}, id: {task.media_id}, platform: {task.paltform}"
+        )
         try:
-            proxy_url = proxy_mgr.get_checked_proxy()
-            print("Using proxy: ", proxy_url)
-            file_name, title, duration = download_audio(
-                task.url, task_id, AUDIO_PATH, proxy_url
+            title, channel, duration, countries_yes, countries_no = (
+                yt_client.get_full_info(task.media_id)
             )
+            print(
+                f"Got title: {title}, channel: {channel}, duration: {duration}, countries_yes: {countries_yes}, countries_no: {countries_no}"
+            )
+
+            if not title:
+                raise ValueError("Video not found or not available")
+
+            proxy_url = proxy_mgr.get_checked_proxy_by_countries(
+                countries_yes, countries_no
+            )
+            print("Using proxy: ", proxy_url)
+
+            file_name = os.path.join(AUDIO_PATH, f"{task_id}.m4a")
+
+            filesize = download_audio(task.url, file_name, proxy=None)
+            # file_name, title, duration = download_audio(
+            #    task.url, task_id, AUDIO_PATH, proxy_url
+            # )
 
             local_files, std, err = split_audio(
                 file_name, DURATION_STR, MAX_FILE_SIZE, FFMPEG_TIMEOUT
             )
             if err:
                 raise ValueError(f"Error splitting files: {err}")
-            x = mass_send_audio(task.user_id, local_files, "FILE", title)
+            x = mass_send_audio(task.chat_id, local_files, "FILE", title)
 
             print("DONE!")
         except Exception as e:
@@ -251,18 +252,23 @@ def process_task(task_id: str, cleanup=True):
             print(error)
 
     if dlmsg:
-        delete_messages(task.user_id, [dlmsg])
+        delete_messages(task.chat_id, [dlmsg])
 
     if x:
         file_media_ids = ",".join([str(i.audio.file_id) for i in x if i])
         task.status = "COMPLETE"
         task.tg_file_id = file_media_ids
-        task.yt_title = title
         task.yt_duration = duration
         task.repeat = repeat
+        task.title = title
+        task.channel = channel
+        task.filesize = filesize
+        task.countries_yes = ",".join(countries_yes)
+        task.countries_no = ",".join(countries_no)
+
     else:
         task.status = "ERROR"
-        send_msg(chat_id=task.user_id, text="Error sending voice, try again later")
+        send_msg(chat_id=task.chat_id, text="Error sending voice, try again later")
         send_msg(
             chat_id=ADMIN_ID, text=f"Error sending msg for task {task_id}: {error}"
         )
@@ -273,7 +279,8 @@ def process_task(task_id: str, cleanup=True):
     db.commit()
     db.close()
     if cleanup:
-        cleanup_files(AUDIO_PATH, task_id)
+        x = delete_files_by_chunk(AUDIO_PATH, task_id)
+        print(f"Deleted {x} files for task {task_id}")
 
 
 @celery_app.task
@@ -294,8 +301,8 @@ if __name__ == "__main__":
     )
 
 """
-if __name__ == "__ma11in__":
+if __name__ == "__main__":
     # run task with task_id
-    task_id = "b8e7e4e7"
+    task_id = "2fa4a642"
     process_task(task_id)
 """

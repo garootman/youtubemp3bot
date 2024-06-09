@@ -13,8 +13,8 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
-
-from assist import extract_urls, universal_check_link, utcnow
+from assist import extract_platform, extract_urls, extract_youtube_info, utcnow
+from database import Base, SessionLocal, Task, engine, session_scope
 from envs import (
     ADMIN_ID,
     AUDIO_PATH,
@@ -23,8 +23,14 @@ from envs import (
     USAGE_PERIODIC_LIMIT,
     USAGE_TIMEDELTA_HOURS,
 )
-from models import SessionLocal, Task, get_db, session_scope
-from worker import get_user_subscribed, get_user_usage, process_task
+from paywall import AccessControlService
+from worker import process_task
+
+db = SessionLocal()
+Base.metadata.create_all(engine)
+
+uacs = AccessControlService(db, USAGE_TIMEDELTA_HOURS, USAGE_PERIODIC_LIMIT)
+
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
 no_yt_links = "No youtube links found in the message"
@@ -104,43 +110,51 @@ async def msg_handler(message: Message) -> None:
         await message.reply(no_yt_links)
         return
     url = links[0]
-    if not universal_check_link(url):
-        await message.reply(no_yt_links)
+    platform = extract_platform(url)
+    if platform != "youtube":
+        await message.reply("Only YouTube links are supported")
+        return
+    media_type, media_id = extract_youtube_info(url)
+
+    if not media_type:
+        await message.reply("Failed to extract video ID from the link")
         return
 
-    user_usage = get_user_usage(message.from_user.id, USAGE_TIMEDELTA_HOURS)
-    unlimit = False
-    subscribed_until = get_user_subscribed(message.from_user.id)
-    if subscribed_until:
-        print(f"User {message.from_user.id} is subscribed until {subscribed_until}")
-        unlimit = subscribed_until > utcnow()
+    access = uacs.check_access(message.from_user.id)
 
-    if len(user_usage) >= USAGE_PERIODIC_LIMIT and not unlimit:
+    if not access:
         await message.answer(
             usage_exceeded.format(USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS)
         )
         return
 
+    paid_till = uacs.get_user_subscription(message.from_user.id)
+
     db = SessionLocal()
     task = Task(
-        user_id=message.from_user.id, msg_text=message.text, url=url, yt_id="no_yt_id"
+        user_id=message.from_user.id,
+        chat_id=message.chat.id,
+        url=url,
+        paltform=platform,
+        media_type=media_type,
+        media_id=media_id,
     )
+
     db.add(task)
     db.commit()
     process_task.delay(task.id)
     print(f"Task {task.id} added, url: {url}")
     db.close()
 
-    if unlimit:
-        expires_in = subscribed_until - utcnow()
+    if paid_till:
+        expires_in = paid_till - utcnow()
         await message.answer(unlimited_until.format(expires_in))
 
     else:
-        await message.answer(
-            task_added.format(
-                USAGE_PERIODIC_LIMIT - len(user_usage), USAGE_TIMEDELTA_HOURS
-            )
+        user_usage = USAGE_PERIODIC_LIMIT - uacs.get_user_tasks_in_hours(
+            message.from_user.id, USAGE_TIMEDELTA_HOURS
         )
+        await message.answer(task_added.format(user_usage, USAGE_TIMEDELTA_HOURS))
 
     return
 

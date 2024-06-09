@@ -67,6 +67,12 @@ class ProxyRevolver:
             if self.check_proxy(proxy):
                 return proxy
 
+    def get_checked_proxy_by_countries(self, countries_yes, countries_no):
+        print(f"get_checked_proxy_by_countries not implemented yet")
+        print(f"countries_yes: {countries_yes}")
+        print(f"countries_no: {countries_no}")
+        return self.get_checked_proxy()
+
     def reject_proxy(self, proxy):
         # proxy turned out to be bad, remove it from the list
         if proxy in self.__proxies:

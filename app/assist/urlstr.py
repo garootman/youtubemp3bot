@@ -11,25 +11,49 @@ def extract_urls(text):
     return urls
 
 
-def universal_check_link(link):
-    # Regular expressions for different YouTube URL formats
-    regexes = [
-        r"http(?:s?)://(?:www\.)?youtube\.com/watch\?v=",
-        r"http(?:s?)://(?:www\.)?youtube\.com/embed/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/v/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/live/",
-        #        r"http(?:s?)://(?:www\.)?youtube\.com/playlist\?list=",
-        # palylists are excluded by now
-        r"http(?:s?)://(?:www\.)?youtube\.com/shorts/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/channel/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/user/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/c/",
-        r"http(?:s?)://(?:www\.)?youtube\.com/@",
-        r"http(?:s?)://(?:www\.)?youtube\.com/music/",
-        r"http(?:s?)://youtu\.be/",
-    ]
-    for regex in regexes:
-        match = re.match(regex, link)
+def extract_youtube_info(url):
+    youtube_patterns = {
+        "video": re.compile(
+            r'(?:https?://)?(?:www\.)?(?:youtube\.com/(?:watch\?v=|embed/|v/)|youtu\.be/)([^"&?/ ]{11})',
+            re.IGNORECASE,
+        ),
+        "short": re.compile(
+            r'(?:https?://)?(?:www\.)?youtube\.com/shorts/([^"&?/ ]{11})', re.IGNORECASE
+        ),
+        "live": re.compile(
+            r'(?:https?://)?(?:www\.)?youtube\.com/live/([^"&?/ ]{11})', re.IGNORECASE
+        ),
+    }
+
+    for media_type, pattern in youtube_patterns.items():
+        match = pattern.match(url)
         if match:
-            return True
-    return False
+            return media_type, match.group(1)
+    return None, None
+
+
+def extract_platform(url):
+    platform_patterns = {
+        "youtube": re.compile(
+            r"(?:https?://)?(?:www\.)?(?:youtube\.com|youtu\.be)", re.IGNORECASE
+        ),
+        "facebook": re.compile(r"(?:https?://)?(?:www\.)?facebook\.com", re.IGNORECASE),
+        "instagram": re.compile(
+            r"(?:https?://)?(?:www\.)?instagram\.com", re.IGNORECASE
+        ),
+        "tiktok": re.compile(r"(?:https?://)?(?:www\.)?tiktok\.com", re.IGNORECASE),
+        "twitter": re.compile(r"(?:https?://)?(?:www\.)?twitter\.com", re.IGNORECASE),
+        "twitch": re.compile(r"(?:https?://)?(?:www\.)?twitch\.tv", re.IGNORECASE),
+        "vimeo": re.compile(r"(?:https?://)?(?:www\.)?vimeo\.com", re.IGNORECASE),
+        "dailymotion": re.compile(
+            r"(?:https?://)?(?:www\.)?dailymotion\.com", re.IGNORECASE
+        ),
+        "soundcloud": re.compile(
+            r"(?:https?://)?(?:www\.)?soundcloud\.com", re.IGNORECASE
+        ),
+    }
+
+    for platform, pattern in platform_patterns.items():
+        if pattern.match(url):
+            return platform
+    return None

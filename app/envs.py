@@ -5,9 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-AUDIO_PATH = "./audios"
-if not os.path.exists(AUDIO_PATH):
-    os.makedirs(AUDIO_PATH)
+AUDIO_PATH = "./audio"
 
 MAX_FILE_SIZE = 48 * 1024 * 1024  # 48 MB
 DURATION_STR = "00:50:00"  # 50 minutes
@@ -43,7 +41,8 @@ if USE_PROXY:
     print("Using proxies param:", USE_PROXY)
 
 LOCAL_PROXY_URL = os.getenv("LOCAL_PROXY_URL", "http://localhost:8888")
-print("Local proxy url:", LOCAL_PROXY_URL)
+if USE_PROXY.upper() == "LOCALHOST":
+    print("Local proxy url:", LOCAL_PROXY_URL)
 
 
 ENV = os.getenv("ENV", "PROD")
@@ -53,6 +52,10 @@ if ENV.lower() == "dev":
     REDIS_URL = "redis://localhost:6379/0"
 else:
     print("Running in PROD mode:", ENV)
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    raise ValueError("No GOOGLE_API_KEY set in .env")
 
 
 PAY_LINK = os.getenv("PAY_LINK", "")
