@@ -9,6 +9,7 @@ def delete_files_by_chunk(folder, chunk):
             filepath = os.path.join(folder, file)
             os.remove(filepath)
             deleted.append(filepath)
+            print (f"Deleted {filepath}")
     return deleted
 
 
@@ -21,4 +22,5 @@ def delete_small_files(folder, chunk, size):
             if os.path.getsize(filepath) < size:
                 os.remove(filepath)
                 deleted.append(filepath)
+                print (f"Deleted {filepath}")
     return deleted
