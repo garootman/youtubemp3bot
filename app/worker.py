@@ -60,6 +60,13 @@ def get_failed_tasks():
     db.close()
     return tasks
 
+def get_new_tasks():
+    db = SessionLocal()
+    # get all tasks with status new
+    tasks = db.query(Task).filter(Task.status == "NEW").all()
+    db.close()
+    return tasks
+
 
 @retry()
 def send_msg(*args, **kwargs):
@@ -293,6 +300,16 @@ def rerun_failed_tasks():
         )
         time.sleep(1)
         # rocess_task(task.id)
+
+
+@celery_app.task
+def process_new_tasks():
+    new_tasks = get_new_tasks()
+    print("Processing new tasks. Got ", len(new_tasks), "total tasks")
+    for task in new_tasks:
+        print(f"Processing task {task.id} as of {task.created_at}")
+        time.sleep(1)
+        process_task(task.id)
 
 
 if __name__ == "__main__":

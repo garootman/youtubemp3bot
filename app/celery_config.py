@@ -16,9 +16,9 @@ celery_app.conf.result_serializer = "json"
 celery_app.conf.accept_content = ["json"]
 
 
-"""
+
 @celery_app.on_after_configure.connect
-def run_restart_errors(sender, **kwargs):
-    print("Running run_restart_errors")
-    sender.send_task("worker.rerun_failed_tasks")
-"""
+def run_new_tasks(sender, **kwargs):
+    print("Running process_new_tasks")
+    sender.send_task("worker.process_new_tasks")
+
