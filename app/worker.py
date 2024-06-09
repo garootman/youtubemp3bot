@@ -244,7 +244,7 @@ def process_task(task_id: str, cleanup=True):
 
             filesize = download_audio(task.url, file_name, proxy=None)
             size_mb = round(filesize / 1024 / 1024, 2)
-            print("Downloaded with size: ", size_mb, "MB")
+            print("Downloaded with size: ", size_mb, "MB to file: ", file_name)
             # file_name, title, duration = download_audio(
             #    task.url, task_id, AUDIO_PATH, proxy_url
             # )
