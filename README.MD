@@ -16,8 +16,8 @@ Turns YT links to m4a audio files
 - Telegram payments: starts and \ or wallet
 - Other platforms: VK, TikTok, etc - all from YTlib
 - Normal messaging + comm with admin + multilang
-- Correct SOLID class structure and project file structure (-proxy)
 - Testing: unit, integro, functional
+- fix worker structure & TaskManager
 - Monitoring: regular ping, staistics
 - linting and stuff, bandit, mypy, docs, etc.
 
