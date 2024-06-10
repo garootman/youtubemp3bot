@@ -9,7 +9,7 @@ services:
         - ARG REDIS_PASSWORD
         - ARG TG_TOKEN
         - ARG ADMIN_ID
-        - ARG USE_PROXY
+        - ARG PROXY_TOKEN
         - ARG ENV
     env_file:
           - .env
@@ -28,7 +28,7 @@ services:
         - ARG REDIS_PASSWORD
         - ARG TG_TOKEN
         - ARG ADMIN_ID
-        - ARG USE_PROXY
+        - ARG PROXY_TOKEN
         - ARG ENV
     env_file:
           - .env

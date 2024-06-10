@@ -12,10 +12,9 @@ from envs import (
     DURATION_STR,
     FFMPEG_TIMEOUT,
     GOOGLE_API_KEY,
-    LOCAL_PROXY_URL,
     MAX_FILE_SIZE,
+    PROXY_TOKEN,
     TG_TOKEN,
-    USE_PROXY,
 )
 from medialib import YouTubeAPIClient, download_audio
 from proxies import ProxyRevolver
@@ -28,20 +27,7 @@ if not os.path.exists(AUDIO_PATH):
     os.makedirs(AUDIO_PATH)
 
 
-def get_proxies():
-    if USE_PROXY == "LOCALHOST":
-        return [LOCAL_PROXY_URL]
-    elif USE_PROXY:
-        if os.path.exists(USE_PROXY):
-            with open(USE_PROXY) as f:
-                return f.readlines()
-        else:
-            print(f"Proxy file {USE_PROXY} not found")
-
-    return []
-
-
-proxy_mgr = ProxyRevolver(get_proxies())
+proxy_mgr = ProxyRevolver(PROXY_TOKEN)
 bot = TeleBot(TG_TOKEN)
 yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
 
@@ -244,7 +230,8 @@ def process_task(task_id: str, cleanup=True):
 
             filesize = download_audio(task.url, file_name, proxy=proxy_url)
             if not filesize:
-                raise ValueError("Error downloading audio, file size is 0")
+                msg = f"Error downloading audio, file size is 0. Proxy was: {proxy_url}, countries_yes: {countries_yes}, countries_no: {countries_no}"
+                raise ValueError(msg)
             size_mb = round(filesize / 1024 / 1024, 2)
             print("Downloaded with size: ", size_mb, "MB to file: ", file_name)
             # file_name, title, duration = download_audio(
@@ -325,6 +312,6 @@ if __name__ == "__main__":
 """
 if __name__ == "__main__":
     # run task with task_id
-    task_id = "2fa4a642"
+    task_id = "70ef6c6b"
     process_task(task_id)
 """

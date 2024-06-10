@@ -36,14 +36,9 @@ if not REDIS_PASSWORD:
     raise ValueError("No REDIS_PASSWORD set in .env")
 
 
-USE_PROXY = os.getenv("USE_PROXY", "")
-if USE_PROXY:
-    print("Using proxies param:", USE_PROXY)
-
-LOCAL_PROXY_URL = os.getenv("LOCAL_PROXY_URL", "http://localhost:8888")
-if USE_PROXY.upper() == "LOCALHOST":
-    print("Local proxy url:", LOCAL_PROXY_URL)
-
+PROXY_TOKEN = os.getenv("PROXY_TOKEN")
+if not PROXY_TOKEN:
+    raise ValueError("No PROXY_TOKEN set in .env")
 
 ENV = os.getenv("ENV", "PROD")
 if ENV.lower() == "dev":

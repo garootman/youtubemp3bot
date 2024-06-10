@@ -18,13 +18,10 @@ POSTGRES_URL=
 
 ENV=PROD
 
-USE_PROXY= # YES | LOCALHOST | NO (empty)
-# http://localhost:8888 | (empty) | http://proxybroker2:8888 
-LOCAL_PROXY_URL=
-
 NETWORK_NAME=default
 
 USAGE_TIMEDELTA_HOURS=24
 USAGE_PERIODIC_LIMIT=10
 PAY_LINK=https://buymeacoffee.com/garootman/e/263925
 GOOGLE_API_KEY=
+PROXY_TOKEN=
