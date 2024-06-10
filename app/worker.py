@@ -184,7 +184,7 @@ def mass_send_audio(chat_id, audio_list, mode, title):
 
 
 @celery_app.task
-def process_task(task_id: str, cleanup=False):
+def process_task(task_id: str, cleanup=True):
     print("Worker called with task id", task_id)
     task = read_new_task(task_id)
     done_task = lookup_same_media(task.paltform, task.media_type, task.media_id)
