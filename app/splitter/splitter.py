@@ -6,8 +6,8 @@ from .cleanup import delete_small_files
 
 def split_audio(filepath, chunklenstr, file_size, timeout):
     # if file not exists, return empty list
-    if not os.path.exists(filepath):
-        return [], "", f"File {filepath} not found"
+    # if not os.path.exists(filepath):
+    #    return [], "", f"File {filepath} not found"
 
     if os.path.getsize(filepath) <= file_size:
         return [filepath], "", ""
