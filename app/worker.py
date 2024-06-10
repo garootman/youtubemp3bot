@@ -242,7 +242,7 @@ def process_task(task_id: str, cleanup=False):
 
             file_name = os.path.join(AUDIO_PATH, f"{task_id}.m4a")
 
-            filesize = download_audio(task.url, file_name, proxy=None)
+            filesize = download_audio(task.url, file_name, proxy=proxy_url)
             if not filesize:
                 raise ValueError("Error downloading audio, file size is 0")
             size_mb = round(filesize / 1024 / 1024, 2)
