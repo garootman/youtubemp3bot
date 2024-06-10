@@ -16,7 +16,6 @@ jobs:
     - name: Copy .env file
       run: |
         cp /home/gituser/env_files/ytbot.env ./.env
-        cp /home/gituser/env_files/ytbot_proxies.txt ./app/.proxies.env
         
 
 
