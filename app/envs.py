@@ -10,6 +10,7 @@ AUDIO_PATH = "./audio"
 MAX_FILE_SIZE = 48 * 1024 * 1024  # 48 MB
 DURATION_STR = "00:50:00"  # 50 minutes
 FFMPEG_TIMEOUT = 60  # 60 seconds
+FREE_MINUTES_MAX = 30  # 30 minutes
 
 TG_TOKEN = os.getenv("TG_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")

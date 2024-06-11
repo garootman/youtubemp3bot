@@ -11,16 +11,19 @@ from envs import (
     AUDIO_PATH,
     DURATION_STR,
     FFMPEG_TIMEOUT,
+    FREE_MINUTES_MAX,
     GOOGLE_API_KEY,
     MAX_FILE_SIZE,
     PROXY_TOKEN,
     TG_TOKEN,
 )
 from medialib import YouTubeAPIClient, download_audio
+from paywall import PaywallService
 from proxies import ProxyRevolver
 from splitter import delete_files_by_chunk, delete_small_files, split_audio
 from sqlalchemy import or_
 from taskmanager import TaskManager
+from telelib import delete_messages, mass_send_audio, send_msg
 
 if not os.path.exists(AUDIO_PATH):
     os.makedirs(AUDIO_PATH)
@@ -29,9 +32,7 @@ if not os.path.exists(AUDIO_PATH):
 proxy_mgr = ProxyRevolver(PROXY_TOKEN)
 yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
 taskman = TaskManager()
-
-
-from telelib import delete_messages, mass_send_audio, send_msg
+pws = PaywallService()
 
 
 @celery_app.task
@@ -94,6 +95,18 @@ def process_task(task_id: str, cleanup=True):
 
             if not title:
                 raise ValueError("Video not found or not available")
+
+            user_is_paid = pws.get_user_subscription(task.user_id)
+            print(f"User is paid: {user_is_paid}")
+            # olny paid users can download files longer than 30 minutes
+            if not user_is_paid and duration > FREE_MINUTES_MAX * 60:
+                send_msg(
+                    chat_id=task.chat_id,
+                    text="Video is over 30 minutes, /subscribe to download!",
+                )
+                task.status = "TOOLONG"
+                taskman.update_task(task)
+                return
 
             proxy_url = proxy_mgr.get_checked_proxy_by_countries(
                 countries_yes, countries_no

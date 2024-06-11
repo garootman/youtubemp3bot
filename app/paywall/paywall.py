@@ -1,14 +1,14 @@
 from datetime import timedelta
 
 from assist import utcnow
-from database import Payment, Task
+from database import Payment, SessionLocal, Task
 from envs import USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS
 
 
 class UsageService:
     # class to handle the usage of the bot by user
     # works with the database to store and retrieve usage data
-    def __init__(self, db):
+    def __init__(self, db=SessionLocal()):
         self.db = db
         print("UsageService initialized with db")
 
@@ -31,7 +31,7 @@ class PaywallService:
     # handle the payment process: create a payment, check if it's paid, etc
     # works with the database to store and retrieve payment data
 
-    def __init__(self, db):
+    def __init__(self, db=SessionLocal()):
         self.db = db
         print("PaywallService initialized with db")
 
@@ -86,7 +86,10 @@ class AccessControlService(PaywallService, UsageService):
     # works with the database to store and retrieve access data
 
     def __init__(
-        self, db, hours_limit=USAGE_TIMEDELTA_HOURS, tasks_limit=USAGE_PERIODIC_LIMIT
+        self,
+        db=SessionLocal(),
+        hours_limit=USAGE_TIMEDELTA_HOURS,
+        tasks_limit=USAGE_PERIODIC_LIMIT,
     ):
         self.db = db
         self.hours_limit = hours_limit
