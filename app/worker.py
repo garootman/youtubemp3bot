@@ -21,97 +21,17 @@ from proxies import ProxyRevolver
 from splitter import delete_files_by_chunk, delete_small_files, split_audio
 from sqlalchemy import or_
 from taskmanager import TaskManager
-from telebot import TeleBot
-from telebot.types import InputMediaAudio
 
 if not os.path.exists(AUDIO_PATH):
     os.makedirs(AUDIO_PATH)
 
 
 proxy_mgr = ProxyRevolver(PROXY_TOKEN)
-bot = TeleBot(TG_TOKEN)
 yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
 taskman = TaskManager()
 
 
-@retry()
-def send_msg(*args, **kwargs):
-    # universdal fnc to wrap send msg
-    return bot.send_message(*args, **kwargs)
-
-
-def delete_messages(chat_id, msg_batch):
-    for msg in msg_batch:
-        if msg:
-            try:
-                bot.delete_message(chat_id=chat_id, message_id=msg.message_id)
-            except Exception as e:
-                print(f"Error deleting message: {e}")
-                pass
-
-
-def mass_send_audio_album(chat_id, audio_list, mode):
-    sent = []
-
-    # Разбиваем аудиофайлы на части по 10 штук
-    for i in range(0, len(audio_list), 10):
-        audio_chunk = audio_list[i : i + 10]
-        media = []
-
-        for j, audio in enumerate(audio_chunk):
-            try:
-                audio_object = audio if mode == "MEDIA" else open(audio, "rb")
-                media.append(InputMediaAudio(media=audio_object))  # , caption=tit))
-
-            except Exception as e:
-                error = f"Error preparing audio for sending: {e}"
-                print(error)
-                media.append(None)
-
-        try:
-            # sent_messages = bot.send_media_group(chat_id=chat_id, media=media)
-            sent_messages = send_msg(chat_id=chat_id, media=media)
-            sent.extend(sent_messages)
-            time.sleep(1)
-        except Exception as e:
-            error = f"Error sending media group: {e}"
-            print(error)
-            sent.extend([None] * len(media))
-
-    if not all(sent):
-        print(f"Not all data was sent to chat {chat_id} with mode {mode}")
-        delete_messages(chat_id, sent)
-        sent = []
-
-    return sent
-
-
-def mass_send_audio(chat_id, audio_list, mode, title):
-    sent = []
-    for i, audio in enumerate(audio_list):
-        try:
-            audio_object = audio if mode == "MEDIA" else open(audio, "rb")
-            tit = f"{title}_{i+1}.m4a"
-            xi = bot.send_audio(
-                chat_id=chat_id,
-                audio=audio_object,
-                title=tit,
-            )
-            print(
-                f"Sent audio chunk {i} of {len(audio_list)} to {chat_id}, sleeping 1 sec."
-            )
-            time.sleep(1)
-
-        except Exception as e:
-            error = f"Error sending voice by {mode}: {e}"
-            print(error)
-            xi = None
-        sent.append(xi)
-    if not all(sent):
-        print(f"Not all data was sent to chat {chat_id} with mode {mode}")
-        delete_messages(chat_id, sent)
-        sent = []
-    return sent
+from telelib import delete_messages, mass_send_audio, send_msg
 
 
 @celery_app.task

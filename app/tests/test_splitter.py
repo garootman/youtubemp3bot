@@ -47,6 +47,8 @@ def test_big_filesize_one_chunk():
 def test_cleanup():
     x = delete_files_by_chunk(folder, "test_cutting")
     assert len(x) == 3
+    # delete the folder
+    os.system(f"rm -rf {folder}")
 
 
 if __name__ == "__main__":
