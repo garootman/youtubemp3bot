@@ -165,6 +165,13 @@ def process_task(task_id: str, cleanup=True):
                 f"Got title: {title}, channel: {channel}, duration: {duration}, countries_yes: {countries_yes}, countries_no: {countries_no}"
             )
 
+            task.title = title
+            task.channel = channel
+            task.duration = duration
+            task.countries_yes = ",".join(countries_yes)
+            task.countries_no = ",".join(countries_no)
+            taskman.update_task(task)
+
             if not title:
                 raise ValueError("Video not found or not available")
 
@@ -204,7 +211,7 @@ def process_task(task_id: str, cleanup=True):
         file_media_ids = ",".join([str(i.audio.file_id) for i in x if i])
         task.status = "COMPLETE"
         task.tg_file_id = file_media_ids
-        task.yt_duration = duration
+        task.duration = duration
         task.repeat = repeat
         task.title = title
         task.channel = channel

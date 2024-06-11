@@ -30,7 +30,7 @@ class ProxyRevolver:
         self.__current = 0
         self.__proxies = []
         self.__token = proxy_token
-        self.load_proxies()
+        self._load_proxies()
 
         if not self.__proxies:
             return
@@ -43,7 +43,7 @@ class ProxyRevolver:
 
         self.__current = random.randint(0, len(self.__proxies) - 1)
 
-    def load_proxies(self):
+    def _load_proxies(self):
         try:
             response = requests.get(
                 "https://proxy.webshare.io/api/v2/proxy/list/?mode=direct&page=1&page_size=100",
@@ -134,6 +134,7 @@ class ProxyRevolver:
             return None
         for _ in range(attempts):
             proxy = self.get_proxy_by_countries(countries_yes, countries_no)
-            if self.check_proxy(proxy):
-                return self._proxy_to_http_syntax(proxy)
+            http_proxy = self._proxy_to_http_syntax(proxy)
+            if self.check_proxy(http_proxy):
+                return http_proxy
         return None
