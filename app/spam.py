@@ -12,11 +12,13 @@ from envs import (
     MAX_FILE_SIZE,
     TG_TOKEN,
 )
-from models import SessionLocal, Task
 from telebot import TeleBot
 
 bot = TeleBot(TG_TOKEN)
 
+from taskmanager import TaskManager
+
+taskman = TaskManager()
 
 tg_message_txt = """Hi 👋 bot admin here! Some updates here:
 1. Now works for stream records too
@@ -24,18 +26,6 @@ tg_message_txt = """Hi 👋 bot admin here! Some updates here:
 3. Fixed some bugs 
 
 Please let me know if you have any issues using /feedback command."""
-
-
-def get_all_users():
-    # selects unique users from the database, returns a list of user_id ints
-    db = SessionLocal()
-    users = db.query(Task).all()
-    db.close()
-    users = [user.user_id for user in users]
-    users = [i for i in users if i]
-    users = list(set(users))
-    print(f"Found {len(users)} users")
-    return users
 
 
 def send_upd_messages(ids, tg_message_txt, only_admin=True):
@@ -69,5 +59,5 @@ if __name__ == "__main__":
         GO_SEND = sys.argv[1].lower() == "true"
     ADMIN_ONLY = not GO_SEND
 
-    ids = get_all_users()
+    ids = taskman.get_unique_user_ids()
     send_upd_messages(ids, tg_message_txt, only_admin=ADMIN_ONLY)

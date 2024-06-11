@@ -4,9 +4,6 @@ FROM python:3.10-slim-buster
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# install ffmpeg
-# RUN sudo apt-get install ffmpeg
-
 # Add the current directory contents into the container at /app
 ADD ./app /app
 
@@ -19,8 +16,6 @@ ARG ADMIN_ID
 ARG PROXY_TOKEN
 ARG ENV
 
-
-
 # Set arg as environment variable
 ENV POSTGRES_URL=$POSTGRES_URL
 ENV REDIS_URL=$REDIS_URL
@@ -31,24 +26,11 @@ ENV PROXY_TOKEN=$PROXY_TOKEN
 ENV ENV=$ENV
 
 
-
-# Copy pomidorlib into the temporary image
-# COPY ./app ./app
-
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
-
-CMD ["python", "/app/mybot.py"]
 
 # RUN pip install pytest
 # RUN pytest 
 # /app/tests
 
-
-
-# Run supervisord when the container launches
-# CMD celery -A worker worker --loglevel=info
-# WORKDIR /app/src
-# CMD celery -A worker worker --loglevel=info
-# CMD celery -A pomidorlib.worker worker --loglevel=info
-# CMD ["/usr/bin/supervisord"]
+CMD ["python", "/app/mybot.py"]

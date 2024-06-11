@@ -28,7 +28,7 @@ class Task(Base):
     status = Column(String(20), default="NEW")
     url = Column(TEXT, default="")
 
-    paltform = Column(String(20), default="")
+    platform = Column(String(20), default="")
     media_type = Column(String(20), default="")
     media_id = Column(String(20), nullable=False)
     countries_yes = Column(TEXT, default="")
@@ -46,4 +46,4 @@ class Task(Base):
         return f"<Task {self.id} {self.status} {self.url}>"
 
     def __str__(self):
-        return f"TG Task: {self.id} {self.status} from {self.updated_at}: url {self.url}, media_id: {self.media_id}"
+        return f"Task: {self.id} {self.status} from {self.updated_at}: url {self.url}, media_id: {self.media_id}"

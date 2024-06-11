@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from assist import retry, utcnow
 from celery_config import celery_app
-from database import Payment, SessionLocal, Task
+from database import Payment, Task
 from envs import (
     ADMIN_ID,
     AUDIO_PATH,
@@ -20,6 +20,7 @@ from medialib import YouTubeAPIClient, download_audio
 from proxies import ProxyRevolver
 from splitter import delete_files_by_chunk, delete_small_files, split_audio
 from sqlalchemy import or_
+from taskmanager import TaskManager
 from telebot import TeleBot
 from telebot.types import InputMediaAudio
 
@@ -30,69 +31,13 @@ if not os.path.exists(AUDIO_PATH):
 proxy_mgr = ProxyRevolver(PROXY_TOKEN)
 bot = TeleBot(TG_TOKEN)
 yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
-
-
-def read_new_task(task_id):
-    db = SessionLocal()
-    task = db.query(Task).filter(Task.id == task_id).first()
-    db.close()
-    return task
-
-
-def get_failed_tasks():
-    db = SessionLocal()
-    # get all tasks with status error
-    tasks = db.query(Task).filter(Task.status == "ERROR").all()
-    db.close()
-    return tasks
-
-
-def get_new_tasks():
-    db = SessionLocal()
-    # get all tasks with status new
-    tasks = db.query(Task).filter(Task.status == "NEW").all()
-    db.close()
-    return tasks
+taskman = TaskManager()
 
 
 @retry()
 def send_msg(*args, **kwargs):
     # universdal fnc to wrap send msg
     return bot.send_message(*args, **kwargs)
-
-
-def lookup_same_url(url):
-    # find task with same yt_id, that is complete and has a tg_file_id
-    # select one with the latest timestamp in updated_at
-    db = SessionLocal()
-    task = (
-        db.query(Task)
-        .filter(Task.url == url, Task.status == "COMPLETE", Task.tg_file_id != "")
-        .order_by(Task.updated_at.desc())
-        .first()
-    )
-    db.close()
-    return task
-
-
-def lookup_same_media(paltform, media_type, media_id):
-    # find task with same paltform, media_type, media_id
-    # that is complete and has a tg_file_id
-    # select one with the latest timestamp in updated_at
-    db = SessionLocal()
-    task = (
-        db.query(Task)
-        .filter(
-            Task.paltform == paltform,
-            Task.media_type == media_type,
-            Task.media_id == media_id,
-            Task.status == "COMPLETE",
-        )
-        .order_by(Task.updated_at.desc())
-        .first()
-    )
-    db.close()
-    return task
 
 
 def delete_messages(chat_id, msg_batch):
@@ -172,8 +117,10 @@ def mass_send_audio(chat_id, audio_list, mode, title):
 @celery_app.task
 def process_task(task_id: str, cleanup=True):
     print("Worker called with task id", task_id)
-    task = read_new_task(task_id)
-    done_task = lookup_same_media(task.paltform, task.media_type, task.media_id)
+    task = taskman.get_task_by_id(task_id)
+    done_task = taskman.lookup_task_by_media(
+        task.platform, task.media_type, task.media_id
+    )
 
     x = []
     dlmsg = None
@@ -208,7 +155,7 @@ def process_task(task_id: str, cleanup=True):
         )
 
         print(
-            f"Downloading audio for url: {task.url}, type: {task.media_type}, id: {task.media_id}, platform: {task.paltform}"
+            f"Downloading audio for url: {task.url}, type: {task.media_type}, id: {task.media_id}, platform: {task.platform}"
         )
         try:
             title, channel, duration, countries_yes, countries_no = (
@@ -273,30 +220,15 @@ def process_task(task_id: str, cleanup=True):
         )
 
     task.error = error
-    db = SessionLocal()
-    db.add(task)
-    db.commit()
-    db.close()
+    taskman.update_task(task)
+
     if cleanup:
-        x = delete_files_by_chunk(AUDIO_PATH, task_id)
-        print(f"Deleted {x} files for task {task_id}")
-
-
-@celery_app.task
-def rerun_failed_tasks():
-    error_tasks = get_failed_tasks()
-    print("Re-running failed tasks. Got ", len(error_tasks), "total tasks")
-    for task in error_tasks:
-        print(
-            f"Re-running task {task.id} as of {task.created_at}, error was: {task.error}"
-        )
-        time.sleep(1)
-        # rocess_task(task.id)
+        _ = delete_files_by_chunk(AUDIO_PATH, task_id)
 
 
 @celery_app.task
 def process_new_tasks():
-    new_tasks = get_new_tasks()
+    new_tasks = taskman.get_new_tasks()
     print("Processing new tasks. Got ", len(new_tasks), "total tasks")
     for task in new_tasks:
         print(f"Processing task {task.id} as of {task.created_at}")
@@ -309,9 +241,11 @@ if __name__ == "__main__":
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
     )
 
+
 """
 if __name__ == "__main__":
     # run task with task_id
-    task_id = "70ef6c6b"
+    task_id = "909884c2"
     process_task(task_id)
+
 """

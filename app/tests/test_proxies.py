@@ -1,3 +1,5 @@
+import random
+
 import pytest
 from proxies import ProxyRevolver
 
@@ -8,7 +10,6 @@ def test_proxy_revolver():
     # test proxy revolver: it loads
     assert proxy_mgr
     assert proxy_mgr.get_proxy() is not None
-    print("Test passed")
 
 
 def test_get_tested_proxy():
@@ -20,16 +21,14 @@ def test_get_tested_proxy():
 
 def test_get_proxy_by_countries():
     # test proxy revolver: it loads
-    import random
-
     countries = proxy_mgr.countries
     c = random.choice(countries)
     p = proxy_mgr.get_proxy_by_countries(c, None)
     assert p
-    print("Test passed")
 
 
 if __name__ == "__main__":
     test_proxy_revolver()
     test_get_tested_proxy()
     test_get_proxy_by_countries()
+    print("All tests passed")

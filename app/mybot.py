@@ -14,7 +14,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
 from assist import extract_platform, extract_urls, extract_youtube_info, utcnow
-from database import Base, SessionLocal, Task, create_db, engine, session_scope
+from database import Base, SessionLocal, create_db, engine, session_scope
 from envs import (
     ADMIN_ID,
     AUDIO_PATH,
@@ -24,6 +24,7 @@ from envs import (
     USAGE_TIMEDELTA_HOURS,
 )
 from paywall import AccessControlService
+from taskmanager import TaskManager
 from worker import process_task
 
 db = SessionLocal()
@@ -32,6 +33,7 @@ create_db()
 
 
 uacs = AccessControlService(db, USAGE_TIMEDELTA_HOURS, USAGE_PERIODIC_LIMIT)
+taskman = TaskManager(db)
 
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
@@ -132,21 +134,16 @@ async def msg_handler(message: Message) -> None:
 
     paid_till = uacs.get_user_subscription(message.from_user.id)
 
-    db = SessionLocal()
-    task = Task(
+    task = taskman.create_task(
         user_id=message.from_user.id,
         chat_id=message.chat.id,
         url=url,
-        paltform=platform,
+        platform=platform,
         media_type=media_type,
         media_id=media_id,
     )
 
-    db.add(task)
-    db.commit()
     process_task.delay(task.id)
-    print(f"Task {task.id} added, url: {url}")
-    db.close()
 
     if paid_till:
         expires_in = paid_till - utcnow()

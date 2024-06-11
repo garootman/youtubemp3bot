@@ -88,7 +88,7 @@ class ProxyRevolver:
     def _lookup_proxy_by_yes_countries(self, countries_yes):
         if not countries_yes:
             return None
-        country_list = countries_yes.split(",")
+        country_list = countries_yes
         country_list = [c.strip().upper() for c in country_list]
         for proxy in self.__proxies:
             valid_country_proxies = [
@@ -101,7 +101,7 @@ class ProxyRevolver:
     def _lookup_proxy_by_no_countries(self, countries_no):
         if not countries_no:
             return None
-        country_list = countries_no.split(",")
+        country_list = countries_no
         country_list = [c.strip().upper() for c in country_list]
         for proxy in self.__proxies:
             valid_country_proxies = [
