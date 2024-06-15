@@ -59,7 +59,11 @@ class TaskManager:
 
     def get_new_tasks(self):
         with self._session() as db:
-            return db.query(Task).filter(Task.status == "NEW").all()
+            all_tasks = db.query(Task).filter(Task.status == "NEW").all()
+            for task in all_tasks:
+                db.expunge(task)
+            return all_tasks
+            
 
     def lookup_task_by_media(self, platform, media_type, media_id):
         # find task with same platform, media_type, media_id
