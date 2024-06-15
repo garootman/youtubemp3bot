@@ -27,7 +27,7 @@ from paywall import AccessControlService
 from taskmanager import TaskManager
 from worker import process_task
 
-db = SessionLocal()
+db = SessionLocal
 create_db()
 # Base.metadata.create_all(bind=engine)
 

@@ -10,13 +10,16 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine("sqlite:///:memory:", echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-db = SessionLocal()
-Base.metadata.create_all(engine)
 
-usage_service = UsageService(db)
+Base.metadata.create_all(engine)
+ses = SessionLocal
+
+usage_service = UsageService(ses)
 user_id = 1234
 chat_id = 5678
 media_id = "ABCDEFG"
+
+db = ses()
 
 
 def test_usage():

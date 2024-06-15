@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 engine = create_engine("sqlite:///:memory:", echo=False)
 SessionLocal = sessionmaker(bind=engine)
-db = SessionLocal()
+db = SessionLocal
 Base.metadata.create_all(engine)
 pws = PaywallService(db)
 
@@ -40,3 +40,8 @@ def test_paywall():
     pws.delete_payment(payment_id)
     # check that get_user_subscription returns None
     assert pws.get_user_subscription(user_id) == None
+
+
+if __name__ == "__main__":
+    test_paywall()
+    print("All tests passed!")

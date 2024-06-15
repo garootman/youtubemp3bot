@@ -10,11 +10,11 @@ from sqlalchemy.orm import sessionmaker
 engine = create_engine("sqlite:///:memory:", echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-db = SessionLocal()
+ses = SessionLocal
 Base.metadata.create_all(engine)
 
-uacs = AccessControlService(db, 1, 1)  # 1 hour, 1 task limit
-
+uacs = AccessControlService(ses, 1, 1)  # 1 hour, 1 task limit
+db = ses()
 
 def test_access_control():
     user_id = 1234

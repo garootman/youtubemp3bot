@@ -60,6 +60,8 @@ def process_task(task_id: str, cleanup=True):
     task.countries_no = ",".join(countries_no)
     taskman.update_task(task)
 
+    task = taskman.get_task_by_id(task_id)
+
     user_is_paid = pws.get_user_subscription(task.user_id)
 
     if not user_is_paid and duration > FREE_MINUTES_MAX * 60:
@@ -129,6 +131,7 @@ def process_new_tasks():
         process_task(task.id)
 
 
+"""
 if __name__ == "__main__":
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
@@ -138,7 +141,6 @@ if __name__ == "__main__":
 """
 if __name__ == "__main__":
     # run task with task_id
-    task_id = "909884c2"
+    task_id = "3c02a029"
     process_task(task_id)
 
-"""
