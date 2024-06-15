@@ -1,6 +1,8 @@
+from contextlib import contextmanager
+
 from database import SessionLocal, Task
 from sqlalchemy.orm import sessionmaker
-from contextlib import contextmanager
+
 
 class TaskManager:
     # class to work with DB model Task
@@ -35,10 +37,10 @@ class TaskManager:
             )
             db.add(task)
             db.flush()  # Ensure the task ID is populated
-            db.expunge(task)  
+            db.expunge(task)
             print(f"Task {task.id} added, url: {url}")
             return task
-        #return self.get_task_by_id(task_id)
+        # return self.get_task_by_id(task_id)
 
     def get_task_by_id(self, task_id):
         with self._session() as db:
@@ -54,7 +56,7 @@ class TaskManager:
     def count_all(self):
         with self._session() as db:
             return db.query(Task).count()
-    
+
     def get_new_tasks(self):
         with self._session() as db:
             return db.query(Task).filter(Task.status == "NEW").all()

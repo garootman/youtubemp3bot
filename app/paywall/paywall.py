@@ -1,9 +1,9 @@
+from contextlib import contextmanager
 from datetime import timedelta
 
 from assist import utcnow
 from database import Payment, SessionLocal, Task
 from envs import USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS
-from contextlib import contextmanager
 
 
 class UsageService:
@@ -25,7 +25,6 @@ class UsageService:
             raise e
         finally:
             session.close()
-
 
     def get_user_tasks_in_hours(self, user_id, hours):
         # returns quantity of completed tasks by user in the last N hours
@@ -94,7 +93,6 @@ class PaywallService:
             db.expunge(new_payment)
             return new_payment.id
 
-
     def approve_payment(self, payment_id):
         # approve a payment
         # set the status to PAID
@@ -117,6 +115,7 @@ class PaywallService:
                 return True
             return False
 
+
 class AccessControlService(PaywallService, UsageService):
     # a class to handle access control
     # check if user has access to the bot
@@ -134,7 +133,6 @@ class AccessControlService(PaywallService, UsageService):
         print(
             f"AccessControlService initialized with db and limits: {tasks_limit} tasks in {hours_limit} hours"
         )
-
 
     def check_access(self, user_id):
         # check if user has access

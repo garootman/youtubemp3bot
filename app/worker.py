@@ -131,7 +131,6 @@ def process_new_tasks():
         process_task(task.id)
 
 
-"""
 if __name__ == "__main__":
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
@@ -144,3 +143,4 @@ if __name__ == "__main__":
     task_id = "3c02a029"
     process_task(task_id)
 
+"""
