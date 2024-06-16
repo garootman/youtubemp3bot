@@ -19,6 +19,8 @@ tg_message_txt = """Hi 👋 bot admin here with updates:
 2. Dayly downloads are unlimited now
 3. maximum video duration is now 4 hours
 
+go ahead and try: https://vk.com/search/video?q=rickroll&z=video281711238_456240128
+
 Feel free to leave your /feedback"""
 
 
