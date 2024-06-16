@@ -114,6 +114,14 @@ async def msg_handler(message: Message) -> None:
         await message.reply(no_yt_links)
         return
     url = links[0]
+
+    task = taskman.create_task(
+        user_id=message.from_user.id, chat_id=message.chat.id, url=url
+    )
+
+    process_task.delay(task.id)
+
+    """
     platform = extract_platform(url)
     if platform != "youtube":
         await message.reply("Only YouTube links are supported")
@@ -123,6 +131,7 @@ async def msg_handler(message: Message) -> None:
     if not media_type:
         await message.reply("Failed to extract video ID from the link")
         return
+    
 
     access = uacs.check_access(message.from_user.id)
 
@@ -131,19 +140,10 @@ async def msg_handler(message: Message) -> None:
             usage_exceeded.format(USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS)
         )
         return
+    
+    
 
     paid_till = uacs.get_user_subscription(message.from_user.id)
-
-    task = taskman.create_task(
-        user_id=message.from_user.id,
-        chat_id=message.chat.id,
-        url=url,
-        platform=platform,
-        media_type=media_type,
-        media_id=media_id,
-    )
-
-    process_task.delay(task.id)
 
     if paid_till:
         expires_in = paid_till - utcnow()
@@ -156,6 +156,7 @@ async def msg_handler(message: Message) -> None:
         await message.answer(task_added.format(user_usage, USAGE_TIMEDELTA_HOURS))
 
     return
+    """
 
 
 async def main() -> None:

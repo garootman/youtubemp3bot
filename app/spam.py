@@ -4,14 +4,7 @@ import os
 import sys
 import time
 
-from envs import (
-    ADMIN_ID,
-    AUDIO_PATH,
-    DURATION_STR,
-    FFMPEG_TIMEOUT,
-    MAX_FILE_SIZE,
-    TG_TOKEN,
-)
+from envs import ADMIN_ID, TG_TOKEN
 from telebot import TeleBot
 
 bot = TeleBot(TG_TOKEN)

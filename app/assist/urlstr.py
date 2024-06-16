@@ -45,15 +45,11 @@ def extract_platform(url):
         "twitter": re.compile(r"(?:https?://)?(?:www\.)?twitter\.com", re.IGNORECASE),
         "twitch": re.compile(r"(?:https?://)?(?:www\.)?twitch\.tv", re.IGNORECASE),
         "vimeo": re.compile(r"(?:https?://)?(?:www\.)?vimeo\.com", re.IGNORECASE),
-        "dailymotion": re.compile(
-            r"(?:https?://)?(?:www\.)?dailymotion\.com", re.IGNORECASE
-        ),
-        "soundcloud": re.compile(
-            r"(?:https?://)?(?:www\.)?soundcloud\.com", re.IGNORECASE
-        ),
+        "vk": re.compile(r"(?:https?://)?(?:www\.)?vk\.com", re.IGNORECASE),
+        "ok": re.compile(r"(?:https?://)?(?:www\.)?ok\.ru", re.IGNORECASE),
     }
 
     for platform, pattern in platform_patterns.items():
         if pattern.match(url):
             return platform
-    return None
+    return "unknown"

@@ -11,10 +11,12 @@ Turns YT links to m4a audio files
 
 ## Future updates
 
-- after-deploy mechanics: exec tasks, ?
+- Other platforms: VK, TikTok, etc - all from YTlib
+- fix to correct logging insted of prints
+- ban function
+- other payment mechanics: share, invite by friend
 - 3 days unlim for ACTIONS (hamster, clicks, following, etc)
 - Telegram payments: starts and \ or wallet
-- Other platforms: VK, TikTok, etc - all from YTlib
 - Normal messaging + comm with admin + multilang
 - Testing: unit, integro, functional
 - fix worker structure & TaskManager

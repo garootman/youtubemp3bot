@@ -34,17 +34,20 @@ def delete_messages(chat_id, msg_batch):
 
 def mass_send_audio(chat_id, audio_list, mode, title):
     sent = []
+    print(
+        f"Sending {len(audio_list)} audio files to {chat_id} with mode {mode}:\n{audio_list}"
+    )
     for i, audio in enumerate(audio_list):
         audio_object = audio if mode == "MEDIA" else open(audio, "rb")
         # if there is more than one audio file, add index to title
         if len(audio_list) > 1:
-            tit = f"{title}_{i+1}.m4a"
+            tit = f"{title}_{i+1}"
         else:
-            tit = f"{title}.m4a"
+            tit = f"{title}"
         xi = send_audio(
             chat_id=chat_id,
             audio=audio_object,
-            title=tit,
+            caption=tit,
         )
         if xi:
             print(

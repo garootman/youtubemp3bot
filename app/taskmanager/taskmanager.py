@@ -25,7 +25,9 @@ class TaskManager:
         finally:
             session.close()
 
-    def create_task(self, user_id, chat_id, url, platform, media_type, media_id):
+    def create_task(
+        self, user_id, chat_id, url, platform="", media_type="", media_id=""
+    ):
         with self._session() as db:
             task = Task(
                 user_id=user_id,
@@ -63,7 +65,6 @@ class TaskManager:
             for task in all_tasks:
                 db.expunge(task)
             return all_tasks
-            
 
     def lookup_task_by_media(self, platform, media_type, media_id):
         # find task with same platform, media_type, media_id
