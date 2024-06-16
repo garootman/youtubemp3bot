@@ -1,6 +1,7 @@
 # separate file for sending results to user
 import asyncio
 import os
+import random
 import sys
 import time
 
@@ -13,12 +14,12 @@ from taskmanager import TaskManager
 
 taskman = TaskManager()
 
-tg_message_txt = """Hi 👋 bot admin here! Some updates here:
-1. Now works for stream records too
-2. Files are now named after YT videos
-3. Fixed some bugs 
+tg_message_txt = """Hi 👋 bot admin here with updates:
+1. Now it is not only YouTube, but also TikTok, OK, VK and some other sites - feel free to try!
+2. Dayly downloads are unlimited now
+3. maximum video duration is now 4 hours
 
-Please let me know if you have any issues using /feedback command."""
+Feel free to leave your /feedback"""
 
 
 def send_upd_messages(ids, tg_message_txt, only_admin=True):
@@ -53,4 +54,7 @@ if __name__ == "__main__":
     ADMIN_ONLY = not GO_SEND
 
     ids = taskman.get_unique_user_ids()
+    # shuffle ids
+
+    isd = random.sample(ids, len(ids))
     send_upd_messages(ids, tg_message_txt, only_admin=ADMIN_ONLY)

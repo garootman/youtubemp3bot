@@ -31,6 +31,6 @@ all_urls = [
     "https://vk.com/video-110135406_456243143",
     "https://ok.ru/video/6652061092578",
     "https://vk.com/audio506644832_456274494_7f1b2655d85afdfcf0",  # not working now - https://vk.com/badbrowser.php
-    "https://001.l0rdfilm.info/50740-poslednij-drakon-2024.html",
+    "https://001.l0rdfilm.info/50740-poslednij-drakon-2024.html",  # not working now - no links for raw m3u8 or something
     "https://ok.ru/video/7772972518062",
 ]
