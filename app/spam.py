@@ -57,6 +57,5 @@ if __name__ == "__main__":
 
     ids = taskman.get_unique_user_ids()
     # shuffle ids
-
     isd = random.sample(ids, len(ids))
     send_upd_messages(ids, tg_message_txt, only_admin=ADMIN_ONLY)

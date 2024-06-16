@@ -52,8 +52,12 @@ class TaskManager:
             return task
 
     def get_unique_user_ids(self):
+        ids = []
         with self._session() as db:
-            return db.query(Task.user_id).distinct().all()
+            tasks_ids = db.query(Task.user_id).distinct().all()
+        for task_id in tasks_ids:
+            ids.append(task_id[0])
+        return ids
 
     def count_all(self):
         with self._session() as db:
