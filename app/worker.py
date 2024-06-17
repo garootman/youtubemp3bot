@@ -213,7 +213,7 @@ def process_new_tasks():
     print(msg)
     for task in new_tasks:
         process_task.delay(task.id)
-        print(f"Added {task.id} as of {task.created_at} to queue")
+        print(f"Added '{task.id}' as of {task.created_at} to queue")
 
 
 if __name__ == "__main__":
