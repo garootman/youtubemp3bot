@@ -58,6 +58,10 @@ def process_task(task_id: str, cleanup=True):
         print(f"Task {task_id} already processed!")
         return
 
+    task.status = "PROCESSING"
+    taskman.update_task(task)
+    task = taskman.get_task_by_id(task_id)
+
     chat_id = task.chat_id
     platform = extract_platform(task.url)
     task.platform = platform
