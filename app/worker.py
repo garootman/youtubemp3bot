@@ -54,6 +54,10 @@ def process_task(task_id: str, cleanup=True):
         print(f"Task {task_id} not found!")
         return
 
+    if task.status != "NEW":
+        print(f"Task {task_id} already processed!")
+        return
+
     chat_id = task.chat_id
     platform = extract_platform(task.url)
     task.platform = platform
@@ -198,22 +202,18 @@ def process_task(task_id: str, cleanup=True):
 
 @celery_app.task
 def process_new_tasks():
+    since = utcnow() - timedelta(hours=3)
     new_tasks = taskman.get_new_tasks()
-    print("Processing new tasks. Got ", len(new_tasks), "total tasks")
+    new_tasks = [i for i in new_tasks if i.created_at > since]
+    msg = f"Processing new tasks since {since}. Got {len(new_tasks)} total tasks"
+    print(msg)
     for task in new_tasks:
-        print(f"Processing task {task.id} as of {task.created_at}")
-        try:
-            process_task(task.id)   
-            time.sleep(1)
-        except Exception as e:
-            print("Error processing task", task.id, e)
-            task.status = "ERROR"
-            task.error = str(e)
-            taskman.update_task(task)
-
+        process_task.delay(task.id)
+        print(f"Added {task.id} as of {task.created_at} to queue")
 
 
 if __name__ == "__main__":
+    # Runs celery. To add beat scheduler, add -B flag
     celery_app.worker_main(
         argv=["worker", "--loglevel=info", "--concurrency=4", "--events"]
     )
