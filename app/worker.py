@@ -202,8 +202,15 @@ def process_new_tasks():
     print("Processing new tasks. Got ", len(new_tasks), "total tasks")
     for task in new_tasks:
         print(f"Processing task {task.id} as of {task.created_at}")
-        time.sleep(1)
-        process_task(task.id)
+        try:
+            process_task(task.id)   
+            time.sleep(1)
+        except Exception as e:
+            print("Error processing task", task.id, e)
+            task.status = "ERROR"
+            task.error = str(e)
+            taskman.update_task(task)
+
 
 
 if __name__ == "__main__":
