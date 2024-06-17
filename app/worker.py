@@ -49,11 +49,12 @@ pws = PaywallService()
 def process_task(task_id: str, cleanup=True):
     print("Worker called with task id", task_id)
     task = taskman.get_task_by_id(task_id)
-    chat_id = task.chat_id
+
     if not task:
         print(f"Task {task_id} not found!")
         return
 
+    chat_id = task.chat_id
     platform = extract_platform(task.url)
     task.platform = platform
     if platform == "youtube":

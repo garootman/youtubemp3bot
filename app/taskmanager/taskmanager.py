@@ -38,18 +38,22 @@ class TaskManager:
                 media_id=media_id,
             )
             db.add(task)
-            db.flush()  # Ensure the task ID is populated
-            db.expunge(task)
-            print(f"Task {task.id} added, url: {url}")
-            return task
-        # return self.get_task_by_id(task_id)
+            db.commit()
+            task_id = task.id
+            print(f"Task {task_id} added, url: {url}")
+            # db.flush()  # Ensure the task ID is populated
+            # db.expunge(task)
+            # return task
+
+        return self.get_task_by_id(task_id)
 
     def get_task_by_id(self, task_id):
         with self._session() as db:
             task = db.query(Task).filter(Task.id == task_id).first()
             if task:
                 db.expunge(task)  # Detach the task from the session
-            return task
+                return task
+            return None
 
     def get_unique_user_ids(self):
         ids = []

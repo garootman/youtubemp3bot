@@ -30,7 +30,7 @@ def send_upd_messages(ids, tg_message_txt, only_admin=True):
     if only_admin:
         print("Sending to admin only")
         ids = [ADMIN_ID]
-
+    print(f"Sending to {len(ids)} users")
     for user_tg_id in ids:
         if not user_tg_id:
             continue

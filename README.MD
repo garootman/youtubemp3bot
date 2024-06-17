@@ -1,33 +1,25 @@
 # YouTube to MP3 Telegram Bot
 
 Code for Telegram bot: https://t.me/tube2mp3bot
-Turns YT links to m4a audio files
+Turns links to m4a audio files: works for various media platforms: YouTube, TikTok, VK, etc.
 
 ## Features
 
-- Any valid link works
-- All video duration from youtube (10h? ok!)
+- Any valid link work
+- Possbile video duration is unlimited! 
 - Sends audio file directly to your Telegram chat
 
 ## Future updates
 
-- Other platforms: VK, TikTok, etc - all from YTlib
-- fix to correct logging insted of prints
-- ban function
-- other payment mechanics: share, invite by friend
-- 3 days unlim for ACTIONS (hamster, clicks, following, etc)
-- Telegram payments: starts and \ or wallet
-- Normal messaging + comm with admin + multilang
-- Testing: unit, integro, functional
-- fix worker structure & TaskManager
-- Monitoring: regular ping, staistics
+- Write unti tests for God's sake!
+- Use logging insted of print!
+- MediaManager class to multilogic media sources, formats, proxies
+- rework payments: use TG wallet, stars, buymeacoffee, invites, hamster...
+- Rework messaging and feedback comm with admin + multilang
+- Integrational tests 
+- Functional tests
 - linting and stuff, bandit, mypy, docs, etc.
-
-## Subscription updates
-
-- paid user track queue - more than 1 track in queue for paid users 
-- limit file size - 50 MB for unpaid users, unlimited for paid
-- get playlist for paid only
+- monitoring - how? :D
 
 ## License
 

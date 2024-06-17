@@ -10,7 +10,14 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
 # sys.path.append("..")
 
 
-engine = create_engine(POSTGRES_URL)
+engine = create_engine(
+    POSTGRES_URL,
+    pool_pre_ping=True,  # проверка соединения перед использованием
+    pool_size=20,  # количество постоянных соединений
+    max_overflow=10,  # количество дополнительных соединений
+    pool_timeout=30,  # время ожидания освобождения соединения (в секундах)
+    pool_recycle=1800,  # время переработки соединений (в секундах)
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
