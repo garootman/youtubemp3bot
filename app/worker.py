@@ -215,7 +215,7 @@ def process_new_tasks():
 
 if __name__ == "__main__":
     celery_app.worker_main(
-        argv=["worker", "--loglevel=info", "--concurrency=2", "--events"]
+        argv=["worker", "--loglevel=info", "--concurrency=4", "--events"]
     )
 
 
