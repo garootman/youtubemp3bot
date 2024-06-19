@@ -213,10 +213,11 @@ def process_new_tasks():
     print(msg)
     for task in new_tasks:
         task_id = task.id
+        ca = task.created_at
         task.status = "NEW"
         taskman.update_task(task)
         process_task.delay(task_id)
-        print(f"Added '{task_id}' as of {task.created_at} to queue")
+        print(f"Added '{task_id}' as of {ca} to queue")
 
 
 if __name__ == "__main__":
