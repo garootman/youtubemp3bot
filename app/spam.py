@@ -14,14 +14,10 @@ from taskmanager import TaskManager
 
 taskman = TaskManager()
 
-tg_message_txt = """Hi 👋 bot admin here with updates:
-1. Now it is not only YouTube, but also TikTok, OK, VK and some other sites - feel free to try!
-2. Dayly downloads are unlimited now
-3. maximum video duration is now 4 hours
-
-go ahead and try: https://vk.com/search/video?q=rickroll&z=video281711238_456240128
-
-Feel free to leave your /feedback"""
+tg_message_txt = """Hi 👋 bot admin here!
+Indian proxies online - now you can get youtube India-only content!
+Thank you for /feedback 🙏 
+"""
 
 
 def send_upd_messages(ids, tg_message_txt, only_admin=True):
