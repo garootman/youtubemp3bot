@@ -18,7 +18,7 @@ class TaskManager:
         session = self._sessionlocal()
         try:
             yield session
-            session.commit()
+            # session.commit()
         except Exception as e:
             session.rollback()
             raise e
@@ -38,6 +38,7 @@ class TaskManager:
                 media_id=media_id,
             )
             db.add(task)
+            db.commit()
             task_id = task.id
             print(f"Task {task_id} added, url: {url}")
             # db.flush()  # Ensure the task ID is populated
@@ -102,4 +103,5 @@ class TaskManager:
     def update_task(self, task):
         with self._session() as db:
             db.add(task)
+            db.commit()
             print(f"Task {task.id} updated")
