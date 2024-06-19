@@ -38,7 +38,6 @@ class TaskManager:
                 media_id=media_id,
             )
             db.add(task)
-            db.commit()
             task_id = task.id
             print(f"Task {task_id} added, url: {url}")
             # db.flush()  # Ensure the task ID is populated
@@ -48,6 +47,8 @@ class TaskManager:
         return self.get_task_by_id(task_id)
 
     def get_task_by_id(self, task_id):
+        if not task_id:
+            return None
         with self._session() as db:
             task = db.query(Task).filter(Task.id == task_id).first()
             if task:
