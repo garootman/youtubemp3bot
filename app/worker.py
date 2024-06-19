@@ -223,7 +223,7 @@ def process_new_tasks():
 if __name__ == "__main__":
     # Runs celery. To add beat scheduler, add -B flag
     celery_app.worker_main(
-        argv=["worker", "--loglevel=info", "--concurrency=4", "--events"]
+        argv=["worker", "--loglevel=info", "--concurrency=1", "--events"]
     )
 
 
