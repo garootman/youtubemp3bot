@@ -11,8 +11,11 @@ Turns links to m4a audio files: works for various media platforms: YouTube, TikT
 
 ## Future updates
 
+- Correct multi-worker + DB session management
 - Write unti tests for God's sake!
 - Use logging insted of print!
+- Re-write statistic SQL requests
+- Rewrite ADS spam functions
 - MediaManager class to multilogic media sources, formats, proxies
 - rework payments: use TG wallet, stars, buymeacoffee, invites, hamster...
 - Rework messaging and feedback comm with admin + multilang
