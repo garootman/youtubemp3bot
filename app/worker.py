@@ -55,7 +55,7 @@ def process_task(task_id: str, cleanup=True):
         return
 
     if task.status != "NEW":
-        print(f"Task {task_id} already processed!")
+        print(f"Task {task_id} is not NEW!")
         return
 
     task.status = "PROCESSING"
@@ -212,24 +212,21 @@ def process_task(task_id: str, cleanup=True):
 
 @celery_app.task
 def process_new_tasks():
-    since = utcnow() - timedelta(hours=3)
-    new_tasks = taskman.get_new_tasks()
-    new_tasks = [i for i in new_tasks if i.created_at > since]
-    msg = f"Processing new tasks since {since}. Got {len(new_tasks)} total tasks"
+    new_task_ids = taskman.get_new_task_ids()
+    msg = f"Processing new tasks. Got {len(new_task_ids)} total tasks: {new_task_ids[:5]}..."
     print(msg)
-    for task in new_tasks:
-        task_id = task.id
-        ca = task.created_at
+    for tid in new_task_ids:
+        task = taskman.get_task_by_id(tid)
         task.status = "NEW"
         taskman.update_task(task)
-        process_task.delay(task_id)
-        print(f"Added '{task_id}' as of {ca} to queue")
+        process_task.delay(tid, cleanup=True)
+        print(f"Added '{tid}' as of {task.created_at} to queue")
 
 
 if __name__ == "__main__":
     # Runs celery. To add beat scheduler, add -B flag
     celery_app.worker_main(
-        argv=["worker", "--loglevel=info", "--concurrency=1", "--events"]
+        argv=["worker", "--loglevel=info", "--concurrency=4", "--events"]
     )
 
 

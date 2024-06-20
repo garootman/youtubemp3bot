@@ -5,24 +5,18 @@ Turns links to m4a audio files: works for various media platforms: YouTube, TikT
 
 ## Features
 
-- Any valid link work
+- Any valid link work for YouTube
+- Some other big media work: VK, TikTok, some others
 - Possbile video duration is unlimited! 
 - Sends audio file directly to your Telegram chat
 
 ## Future updates
 
-- Correct multi-worker + DB session management
-- Write unti tests for God's sake!
-- Use logging insted of print!
-- Re-write statistic SQL requests
-- Rewrite ADS spam functions
-- MediaManager class to multilogic media sources, formats, proxies
-- rework payments: use TG wallet, stars, buymeacoffee, invites, hamster...
-- Rework messaging and feedback comm with admin + multilang
-- Integrational tests 
-- Functional tests
-- linting and stuff, bandit, mypy, docs, etc.
-- monitoring - how? :D
+- Add Vimeo and Instagram
+- Paid functions: playlists, videos over N hours
+- Multiple payment methods: Wallet, BuymeaCoffee, tg stars, outside airdrop-like actions (hamster...)
+- Admin support chat
+
 
 ## License
 

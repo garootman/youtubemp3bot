@@ -41,9 +41,6 @@ class TaskManager:
             db.commit()
             task_id = task.id
             print(f"Task {task_id} added, url: {url}")
-            # db.flush()  # Ensure the task ID is populated
-            # db.expunge(task)
-            # return task
 
         return self.get_task_by_id(task_id)
 
@@ -69,16 +66,15 @@ class TaskManager:
         with self._session() as db:
             return db.query(Task).count()
 
-    def get_new_tasks(self):
+    def get_new_task_ids(self):
+        ret_ids = []
         with self._session() as db:
-            # returns tasks that are NEW or PROCESSING
-            # all_tasks = db.query(Task).filter(Task.status == "NEW").all()
-            all_tasks = (
+            new_tasks = (
                 db.query(Task).filter(Task.status.in_(["NEW", "PROCESSING"])).all()
             )
-            for task in all_tasks:
-                db.expunge(task)
-            return all_tasks
+            for task in new_tasks:
+                ret_ids.append(task.id)
+        return ret_ids
 
     def lookup_task_by_media(self, platform, media_type, media_id):
         # find task with same platform, media_type, media_id
@@ -102,6 +98,6 @@ class TaskManager:
 
     def update_task(self, task):
         with self._session() as db:
-            db.add(task)
+            merged_task = db.merge(task)
             db.commit()
-            print(f"Task {task.id} updated")
+            print(f"Task {merged_task.id} merged and updated")
