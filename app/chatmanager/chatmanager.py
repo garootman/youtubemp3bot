@@ -64,6 +64,8 @@ class ChatManager(ModelManager):
         return new_chat_object
 
     def _get_any_chat_obj(self, chat_id, message=None):
+        print ("SKIPPING CHAT FROM MESSAGE FOR NOW")
+        message=None
         if message:
             print("Chat from message")
             return self._message_to_chat(message)
