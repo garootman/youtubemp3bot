@@ -1,6 +1,7 @@
 import random
 
 import pytest
+
 from proxies import ProxyRevolver
 
 proxy_mgr = ProxyRevolver()

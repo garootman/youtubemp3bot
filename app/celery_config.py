@@ -1,6 +1,7 @@
 from celery import Celery
 from celery.schedules import crontab, timedelta
 from celery.signals import worker_ready
+
 from envs import REDIS_URL
 
 print("using redis at", REDIS_URL)

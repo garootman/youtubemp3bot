@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 
 import pytest
-from database import Base, Task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from database import Base, Task
 from taskmanager import TaskManager
 
 engine = create_engine("sqlite:///:memory:", echo=False)

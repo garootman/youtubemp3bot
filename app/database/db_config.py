@@ -1,9 +1,10 @@
 import os
 from contextlib import contextmanager
 
-from envs import POSTGRES_URL
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker, validates
+
+from envs import POSTGRES_URL
 
 # add 2 folders up to import envs
 # import sys

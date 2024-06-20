@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from splitter import delete_files_by_chunk, delete_small_files, split_audio
 
 # parepare files: make a copy of "test_cutting.m4a.test" to "test_cutting.m4a"

@@ -4,6 +4,7 @@ import re
 from abc import ABC, abstractmethod
 
 import requests
+
 from envs import PROXY_TOKEN
 
 """        {

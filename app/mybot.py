@@ -13,7 +13,9 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import Message
+
 from assist import extract_platform, extract_urls, extract_youtube_info, utcnow
+from chatmanager import ChatManager
 from database import Base, SessionLocal, create_db, engine, session_scope
 from envs import (
     ADMIN_ID,
@@ -34,6 +36,7 @@ create_db()
 
 uacs = AccessControlService(db, USAGE_TIMEDELTA_HOURS, USAGE_PERIODIC_LIMIT)
 taskman = TaskManager(db)
+chatman = ChatManager(db)
 
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
@@ -52,6 +55,10 @@ unlimited_until = "You have unlimited uses, expires in {}"
 form_router = Router()
 
 
+def bump(message: Message) -> None:
+    chatman.bump_noban(message.chat.id, message=message)
+
+
 class BotState(StatesGroup):
     waiting_for_feedback = State()
     waiting_for_payment = State()
@@ -59,6 +66,7 @@ class BotState(StatesGroup):
 
 @form_router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
+    bump(message)
     await message.answer(hello_msg.format(message.from_user.full_name))
 
 
@@ -66,6 +74,7 @@ async def command_start_handler(message: Message) -> None:
 async def feedback_command_handler(message: Message, state: FSMContext) -> None:
     await message.answer(feedback_msg)
     # await FeedbackState.waiting_for_feedback.set()
+    bump(message)
     await state.set_state(BotState.waiting_for_feedback)
 
 
@@ -118,7 +127,7 @@ async def msg_handler(message: Message) -> None:
     task = taskman.create_task(
         user_id=message.from_user.id, chat_id=message.chat.id, url=url
     )
-
+    bump(message)
     process_task.delay(task.id)
 
     """

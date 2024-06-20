@@ -4,27 +4,12 @@ from datetime import timedelta
 from assist import utcnow
 from database import Payment, SessionLocal, Task
 from envs import USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS
+from modelmanager import ModelManager
 
 
-class UsageService:
-
+class UsageService(ModelManager):
     # class to handle the usage of the bot by user
     # works with the database to store and retrieve usage data
-    def __init__(self, db=SessionLocal):
-        self._sessionlocal = db
-        print("UsageService initialized with db")
-
-    @contextmanager
-    def _session(self):
-        session = self._sessionlocal()
-        try:
-            yield session
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
 
     def get_user_tasks_in_hours(self, user_id, hours):
         # returns quantity of completed tasks by user in the last N hours
@@ -40,27 +25,11 @@ class UsageService:
             return len(user_tasks)
 
 
-class PaywallService:
+class PaywallService(ModelManager):
     # a class to handle the paywall. scenarios:
     # check if user is subscribed, and when the subscription ends
     # handle the payment process: create a payment, check if it's paid, etc
     # works with the database to store and retrieve payment data
-
-    def __init__(self, db=SessionLocal):
-        self._sessionlocal = db
-        print("PaywallService initialized with db")
-
-    @contextmanager
-    def _session(self):
-        session = self._sessionlocal()
-        try:
-            yield session
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
 
     def get_user_subscription(self, user_id):
         # get the user's subscription end date

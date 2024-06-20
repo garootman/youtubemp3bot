@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from assist import extract_platform, extract_youtube_info, retry, utcnow
 from celery_config import celery_app
+from chatmanager import ChatManager
 from database import Payment, Task
 from envs import (
     ADMIN_ID,
@@ -31,9 +32,11 @@ from splitter import (
     get_chunk_duration_str,
     split_audio,
 )
-from sqlalchemy import or_
 from taskmanager import TaskManager
 from telelib import delete_messages, mass_send_audio, send_msg
+
+# from database import SessionLocal
+# db = SessionLocal
 
 if not os.path.exists(AUDIO_PATH):
     os.makedirs(AUDIO_PATH)
@@ -41,8 +44,10 @@ if not os.path.exists(AUDIO_PATH):
 
 proxy_mgr = ProxyRevolver(PROXY_TOKEN)
 yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
+
 taskman = TaskManager()
 pws = PaywallService()
+chatman = ChatManager()
 
 
 @celery_app.task
@@ -206,6 +211,7 @@ def process_task(task_id: str, cleanup=True):
     task.countries_yes = ",".join(countries_yes)
     task.countries_no = ",".join(countries_no)
     taskman.update_task(task)
+    chatman.bump_noban(chat_id)
     if cleanup:
         _ = delete_files_by_chunk(AUDIO_PATH, task_id)
 

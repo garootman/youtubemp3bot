@@ -1,29 +1,10 @@
-from contextlib import contextmanager
-
-from database import SessionLocal, Task
-from sqlalchemy.orm import sessionmaker
+from database import Task
+from modelmanager import ModelManager
 
 
-class TaskManager:
+class TaskManager(ModelManager):
     # class to work with DB model Task
     # includes methods to make all operations with Task
-
-    def __init__(self, db=SessionLocal):
-        self._sessionlocal = db
-        ct = self.count_all()
-        print("TaskManager created, total tasks: ", ct)
-
-    @contextmanager
-    def _session(self):
-        session = self._sessionlocal()
-        try:
-            yield session
-            # session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e
-        finally:
-            session.close()
 
     def create_task(
         self, user_id, chat_id, url, platform="", media_type="", media_id=""

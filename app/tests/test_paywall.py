@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
 
 import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
 from assist import utcnow
 from database import Base, Payment
 from paywall import PaywallService
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 engine = create_engine("sqlite:///:memory:", echo=False)
 SessionLocal = sessionmaker(bind=engine)

@@ -5,14 +5,18 @@ import random
 import sys
 import time
 
-from envs import ADMIN_ID, TG_TOKEN
 from telebot import TeleBot
+from telebot.apihelper import ApiException
+
+from envs import ADMIN_ID, TG_TOKEN
 
 bot = TeleBot(TG_TOKEN)
 
+from chatmanager import ChatManager
 from taskmanager import TaskManager
 
 taskman = TaskManager()
+chatman = ChatManager()
 
 tg_message_txt = """Hi 👋 bot admin here!
 Indian proxies online - now you can get youtube India-only content!
@@ -35,9 +39,12 @@ def send_upd_messages(ids, tg_message_txt, only_admin=True):
             time.sleep(5)
             print(f"Sent message to {user_tg_id}")
             sent += 1
+            chatman.bump_noban(user_tg_id)
         except Exception as e:
             errors += 1
             print(f"Error sending message to {user_tg_id}: {e}")
+            if "bot was blocked" in str(e).lower():
+                chatman.ban_chat(user_tg_id)
 
     print(f"Sent {sent} messages total, {errors} errors.")
 
