@@ -68,8 +68,8 @@ def process_task(task_id: str, cleanup=True):
     if platform == "youtube":
         video_info = {}
         media_type, media_id = extract_youtube_info(task.url)
-        title, channel, duration, countries_yes, countries_no = yt_client.get_full_info(
-            media_id
+        title, channel, duration, countries_yes, countries_no, islive = (
+            yt_client.get_full_info(media_id)
         )
         proxy_url = proxy_mgr.get_checked_proxy_by_countries(
             countries_yes, countries_no
@@ -80,8 +80,14 @@ def process_task(task_id: str, cleanup=True):
             taskman.update_task(task)
             send_msg(chat_id=chat_id, text="Video not found or not available")
             return
-        # task.media_type = media_type
-        # task.media_id = media_id
+        if islive:
+            # end task if live stream
+            print(f"Video is live: {task.url}")
+            task.status = "ISLIVE"
+            taskman.update_task(task)
+            send_msg(chat_id=chat_id, text="Video is live, cannot download")
+            return
+
     else:
         video_info = get_media_info(task.url)
         error = video_info.get("error")

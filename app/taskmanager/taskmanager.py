@@ -72,7 +72,7 @@ class TaskManager:
     def get_new_tasks(self):
         with self._session() as db:
             # returns tasks that are NEW or PROCESSING
-            #all_tasks = db.query(Task).filter(Task.status == "NEW").all()
+            # all_tasks = db.query(Task).filter(Task.status == "NEW").all()
             all_tasks = (
                 db.query(Task).filter(Task.status.in_(["NEW", "PROCESSING"])).all()
             )

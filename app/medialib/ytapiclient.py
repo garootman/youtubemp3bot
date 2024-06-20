@@ -44,6 +44,15 @@ class YouTubeAPIClient:
             return 0
         return int(isodate.parse_duration(duration_str).total_seconds())
 
+    def get_stream_live(self, snippet):
+        # returns True if stream is live
+        liveness = []
+        for snip in snippet["items"]:
+            if "snippet" in snip:
+                if snip["snippet"].get("liveBroadcastContent", "").lower() == "live":
+                    return True
+        return False
+
     def get_video_countries_avail(self, metadata_dict):
         avail = drilldown(
             metadata_dict,
@@ -83,4 +92,5 @@ class YouTubeAPIClient:
         duration = self.get_video_duration(metadata)
         countries_yes = self.get_video_countries_avail(metadata)
         countries_no = self.get_video_countries_blocked(metadata)
-        return title, channel, duration, countries_yes, countries_no
+        live = self.get_stream_live(snippet)
+        return title, channel, duration, countries_yes, countries_no, live
