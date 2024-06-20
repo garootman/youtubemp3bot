@@ -1,6 +1,6 @@
 from database import Task
 from modelmanager import ModelManager
-
+from datetime import datetime, timedelta
 
 class TaskManager(ModelManager):
     # class to work with DB model Task
@@ -35,6 +35,7 @@ class TaskManager(ModelManager):
                 return task
             return None
 
+
     def get_unique_user_ids(self):
         ids = []
         with self._session() as db:
@@ -47,14 +48,15 @@ class TaskManager(ModelManager):
         with self._session() as db:
             return db.query(Task).count()
 
-    def get_new_task_ids(self):
+    def get_new_task_ids(self, hours_back = 3):
         ret_ids = []
         with self._session() as db:
             new_tasks = (
                 db.query(Task).filter(Task.status.in_(["NEW", "PROCESSING"])).all()
             )
             for task in new_tasks:
-                ret_ids.append(task.id)
+                if task.created_at > datetime.utcnow() - timedelta(hours=hours_back):
+                    ret_ids.append(task.id)
         return ret_ids
 
     def lookup_task_by_media(self, platform, media_type, media_id):
@@ -76,6 +78,17 @@ class TaskManager(ModelManager):
             if task:
                 db.expunge(task)
             return task
+
+    """
+        def check_duplicate_task(self, chat_id, url):
+            is_duplicate = False
+            with self._session() as db:
+                task = db.query(Task).filter(Task.chat_id == chat_id, Task.url == url).first()
+                if task:
+                    is_duplicate = True
+            return is_duplicate
+    """
+
 
     def update_task(self, task):
         with self._session() as db:
