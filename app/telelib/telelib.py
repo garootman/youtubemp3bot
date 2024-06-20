@@ -1,3 +1,4 @@
+import os
 import time
 
 from assist import retry
@@ -17,7 +18,8 @@ def send_msg(*args, **kwargs):
 @retry()
 def send_audio(*args, **kwargs):
     # universdal fnc to wrap send msg
-    return bot.send_audio(*args, **kwargs)
+    msg = bot.send_audio(*args, **kwargs)
+    return msg
 
 
 @retry()
@@ -38,7 +40,15 @@ def mass_send_audio(chat_id, audio_list, mode, title):
         f"Sending {len(audio_list)} audio files to {chat_id} with mode {mode}:\n{audio_list}"
     )
     for i, audio in enumerate(audio_list):
-        audio_object = audio if mode == "MEDIA" else open(audio, "rb")
+        if mode == "MEDIA":
+            audio_object = InputMediaAudio(media=audio)
+        elif mode == "FILE":
+            if os.path.exists(audio):
+                audio_object = open(audio, "rb")
+            else:
+                print(f"File {audio} does not exist!")
+                sent.append(None)
+                continue
         # if there is more than one audio file, add index to title
         if len(audio_list) > 1:
             tit = f"{title}_{i+1}"
