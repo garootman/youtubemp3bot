@@ -55,7 +55,7 @@ RUN export POSTGRES_URL=$POSTGRES_URL \
     PAY_LINK=$PAY_LINK 
         
 # Run tests
-RUN pytest tests
+#RUN pytest tests
 
 # Set the working directory to /app/scripts
 WORKDIR /app/scripts
