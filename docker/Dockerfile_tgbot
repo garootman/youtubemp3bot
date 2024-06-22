@@ -51,7 +51,12 @@ RUN export POSTGRES_URL=$POSTGRES_URL \
     TG_TOKEN=$TG_TOKEN \
     ADMIN_ID=$ADMIN_ID \
     PROXY_TOKEN=$PROXY_TOKEN \
-    ENV=$ENV 
+    ENV=$ENV  \
+    GOOGLE_API_KEY=$GOOGLE_API_KEY \
+    PAY_LINK=$PAY_LINK 
+
+
+
     
 # Run tests
 RUN pytest tests
