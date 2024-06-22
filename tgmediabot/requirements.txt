@@ -1,0 +1,10 @@
+aiogram==3.8.0
+celery==5.4.0
+pyTelegramBotAPI==4.19.1
+pytest==8.0.2
+python-dotenv==1.0.1
+redis==5.0.5
+SQLAlchemy==2.0.30
+yt-dlp==2024.5.27
+psycopg2-binary==2.9.9
+isodate==0.6.1

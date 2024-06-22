@@ -2,7 +2,7 @@ services:
   tgbot:
     build:
       context: .
-      dockerfile: ./app/Dockerfile_tgbot
+      dockerfile: ./docker/Dockerfile_tgbot
       args:
         - ARG POSTGRES_URL
         - ARG REDIS_URL
@@ -21,7 +21,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: ./app/Dockerfile_worker
+      dockerfile: ./docker/Dockerfile_worker
       args:
         - ARG POSTGRES_URL
         - ARG REDIS_URL
