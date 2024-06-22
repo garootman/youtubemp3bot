@@ -16,16 +16,18 @@ COPY ../scripts /app/scripts
 RUN apt-get update && apt-get install -y ffmpeg
 
 
-# Arguments
+# Arguments for build
 ARG POSTGRES_URL
 ARG REDIS_URL
 ARG REDIS_PASSWORD
+ARG GOOGLE_API_KEY
 ARG TG_TOKEN
 ARG ADMIN_ID
 ARG PROXY_TOKEN
 ARG ENV
+ARG PAY_LINK
 
-# Set arg as environment variable
+# Set environment variables for runtime
 ENV POSTGRES_URL=$POSTGRES_URL
 ENV REDIS_URL=$REDIS_URL
 ENV REDIS_PASSWORD=$REDIS_PASSWORD
@@ -33,14 +35,25 @@ ENV TG_TOKEN=$TG_TOKEN
 ENV ADMIN_ID=$ADMIN_ID
 ENV PROXY_TOKEN=$PROXY_TOKEN
 ENV ENV=$ENV
+ENV GOOGLE_API_KEY=$GOOGLE_API_KEY
+ENV PAY_LINK=$PAY_LINK
 
 
-# run tests
-WORKDIR /app/
-RUN pip install pytest
+# Copy tests into container at /app
 COPY ../tests /app/tests
-RUN pytest 
 
+# Ensure environment variables are available during pytest run
+WORKDIR /app
+RUN export POSTGRES_URL=$POSTGRES_URL \
+    REDIS_URL=$REDIS_URL \
+    REDIS_PASSWORD=$REDIS_PASSWORD \
+    TG_TOKEN=$TG_TOKEN \
+    ADMIN_ID=$ADMIN_ID \
+    PROXY_TOKEN=$PROXY_TOKEN \
+    ENV=$ENV 
+    
+# Run tests
+RUN pytest tests
 
 # Set the working directory to /app/scripts
 WORKDIR /app/scripts
