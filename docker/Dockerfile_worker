@@ -12,15 +12,6 @@ RUN pip install --no-cache-dir /app/tgmediabot
 # Copy scripts into container at /app
 COPY ../scripts /app/scripts
 
-# run tests
-# RUN pip install pytest
-# COPY ../tests /app/tests
-# RUN pytest 
-
-
-# Set the working directory to /app/scripts
-WORKDIR /app/scripts
-
 # install ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg
 
@@ -42,6 +33,17 @@ ENV TG_TOKEN=$TG_TOKEN
 ENV ADMIN_ID=$ADMIN_ID
 ENV PROXY_TOKEN=$PROXY_TOKEN
 ENV ENV=$ENV
+
+
+# run tests
+WORKDIR /app/
+RUN pip install pytest
+COPY ../tests /app/tests
+RUN pytest 
+
+
+# Set the working directory to /app/scripts
+WORKDIR /app/scripts
 
 
 # CMD to run worker ptyhon file

@@ -12,7 +12,7 @@ filepath = os.path.join(folder, "test_cutting.m4a")
 chunklenstr = "00:10:00"  # 10 minutes
 file_size = 1 * 1024 * 1024  # 1 MB
 timeout = 3  # 3 seconds
-init_path = os.path.join('tests', 'unit', 'test_cutting.m4a.test')
+init_path = os.path.join("tests", "unit", "test_cutting.m4a.test")
 
 
 def test_prepare():
