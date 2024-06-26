@@ -1,18 +1,27 @@
+import logging
+
 import isodate
 import requests
 
 from tgmediabot.assist import drilldown
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class YouTubeAPIClient:
     # class to work with YT API
     # gets video metadata and other technical info
     def __init__(self, api_key):
+        logger.debug(f"Initializing YouTube API client with key {api_key[:5]}...")
         self.__api_key = api_key
         selftest = self.self_test_apikey()
         if not selftest:
+            logger.critical("API key is invalid")
             raise Exception("API key is invalid")
-        print("YouTube API client initialized successfully!")
+        logger.info("YouTube API client initialized successfully!")
 
     def self_test_apikey(self):
         # test if api key is valid - using API ping
@@ -27,6 +36,10 @@ class YouTubeAPIClient:
         response = requests.get(req_url)
         if response.status_code == 200:
             return response.json()
+        logger.info(
+            f"Got response {response.status_code} from YT API for video {video_id}"
+        )
+        logger.debug(f"Response text: {response.text}")
         return {}
 
     def get_video_snippet(self, vide_id):
@@ -35,6 +48,11 @@ class YouTubeAPIClient:
         response = requests.get(req_url)
         if response.status_code == 200:
             return response.json()
+        logger.info(
+            f"Got response {response.status_code} from YT API for video {vide_id}"
+        )
+        logger.debug(f"Response text: {response.text}")
+        return {}
 
     def get_video_duration(self, metadata_dict) -> int:
         # returns video duration in int seconds
@@ -51,6 +69,7 @@ class YouTubeAPIClient:
         for snip in snippet["items"]:
             if "snippet" in snip:
                 if snip["snippet"].get("liveBroadcastContent", "").lower() == "live":
+                    logger.info("Stream is live!")
                     return True
         return False
 
@@ -88,6 +107,12 @@ class YouTubeAPIClient:
         # get all info about video
         metadata = self.get_video_metadata(video_id)
         snippet = self.get_video_snippet(video_id)
+        if not (metadata and snippet):
+            logger.error(f"Video {video_id} has no metadata or snipper")
+            logger.debug(f"Snippet was {snippet}")
+            logger.debug(f"Metadata was {metadata}")
+            return "", "", 0, [], [], False
+
         title = self.get_video_title(snippet)
         channel = self.get_video_channel(snippet)
         duration = self.get_video_duration(metadata)

@@ -1,3 +1,4 @@
+import logging
 import os
 from contextlib import contextmanager
 
@@ -9,6 +10,11 @@ from tgmediabot.envs import POSTGRES_URL
 # add 2 folders up to import envs
 # import sys
 # sys.path.append("..")
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 engine = create_engine(
@@ -46,4 +52,4 @@ def session_scope():
 
 def create_db(base=Base, engine=engine):
     Base.metadata.create_all(engine)
-    print("DB + tables created successfully at", POSTGRES_URL)
+    logger.info("Database created with all tables")

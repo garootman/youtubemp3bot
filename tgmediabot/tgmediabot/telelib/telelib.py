@@ -9,35 +9,45 @@ from tgmediabot.envs import TG_TOKEN
 
 bot = TeleBot(TG_TOKEN)
 
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 
 @retry()
 def send_msg(*args, **kwargs):
     # universdal fnc to wrap send msg
+    logger.debug(f"Sending message: {args}, {kwargs}")
     return bot.send_message(*args, **kwargs)
 
 
 @retry()
 def send_audio(*args, **kwargs):
     # universdal fnc to wrap send msg
+    logger.debug(f"Sending audio: {args}, {kwargs}")
     msg = bot.send_audio(*args, **kwargs)
     return msg
 
 
 @retry()
 def delete_messages(chat_id, msg_batch):
+    logger.debug(f"Deleting messages: {msg_batch}")
     for msg in msg_batch:
         if msg:
             try:
                 bot.delete_message(chat_id=chat_id, message_id=msg.message_id)
             except Exception as e:
-                print(f"Error deleting message: {e}")
+                logger.error(f"Error deleting message: {e}")
                 return False
     return True
 
 
 def mass_send_audio(chat_id, audio_list, mode, title):
     sent = []
-    print(
+    logger.debug(
         f"Sending {len(audio_list)} audio files to {chat_id} with mode {mode}:\n{audio_list}"
     )
     for i, audio in enumerate(audio_list):
@@ -47,7 +57,7 @@ def mass_send_audio(chat_id, audio_list, mode, title):
             if os.path.exists(audio):
                 audio_object = open(audio, "rb")
             else:
-                print(f"File {audio} does not exist!")
+                logger.error(f"File {audio} does not exist!")
                 sent.append(None)
                 continue
         # if there is more than one audio file, add index to title
@@ -61,17 +71,16 @@ def mass_send_audio(chat_id, audio_list, mode, title):
             caption=tit,
         )
         if xi:
-            print(
+            logger.info(
                 f"Sent audio chunk {i} of {len(audio_list)} to {chat_id}, sleeping 1 sec."
             )
             time.sleep(1)
         else:
-            error = f"Error sending voice by {mode}: {e}"
-            print(error)
+            logger.error(f"Error sending voice by {mode}")
             xi = None
         sent.append(xi)
     if not all(sent):
-        print(f"Not all data was sent to chat {chat_id} with mode {mode}")
+        logger.error("Not all data was sent to chat {chat_id} with mode {mode}")
         delete_messages(chat_id, sent)
         sent = []
     return sent

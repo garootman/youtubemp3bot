@@ -1,3 +1,4 @@
+import logging
 from contextlib import contextmanager
 from datetime import timedelta
 
@@ -5,6 +6,11 @@ from tgmediabot.assist import utcnow
 from tgmediabot.database import Payment, SessionLocal, Task
 from tgmediabot.envs import USAGE_PERIODIC_LIMIT, USAGE_TIMEDELTA_HOURS
 from tgmediabot.modelmanager import ModelManager
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class UsageService(ModelManager):
@@ -21,6 +27,9 @@ class UsageService(ModelManager):
                 .filter(Task.status == "COMPLETE")
                 .filter(Task.created_at > date_until)
                 .all()
+            )
+            logger.debug(
+                f"User {user_id} completed {len(user_tasks)} tasks in the last {hours} hours"
             )
             return len(user_tasks)
 
@@ -43,6 +52,7 @@ class PaywallService(ModelManager):
                 .first()
             )
             if user_payment:
+                logger.debug(f"User {user_id} has payments: {user_payment}")
                 return user_payment.valid_till
             return None
 
@@ -99,7 +109,7 @@ class AccessControlService(PaywallService, UsageService):
         self._sessionlocal = db
         self.hours_limit = hours_limit
         self.tasks_limit = tasks_limit
-        print(
+        logger.info(
             f"AccessControlService initialized with db and limits: {tasks_limit} tasks in {hours_limit} hours"
         )
 
@@ -108,8 +118,13 @@ class AccessControlService(PaywallService, UsageService):
         # return True if user has access
         # return False if user has no access
         # return None if user is not found
+        logger.info(f"Checking access for user {user_id}")
         if self.get_user_subscription(user_id):
+            logger.info(f"User {user_id} has a valid subscription")
             return True
         if self.get_user_tasks_in_hours(user_id, self.hours_limit) >= self.tasks_limit:
+            logger.info(
+                f"User {user_id} has reached the limit of {self.tasks_limit} tasks in {self.hours_limit} hours"
+            )
             return False
         return True

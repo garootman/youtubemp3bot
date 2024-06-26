@@ -1,7 +1,13 @@
+import logging
 from datetime import datetime, timedelta
 
 from tgmediabot.database import Task
 from tgmediabot.modelmanager import ModelManager
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class TaskManager(ModelManager):
@@ -11,6 +17,9 @@ class TaskManager(ModelManager):
     def create_task(
         self, user_id, chat_id, url, platform="", media_type="", media_id=""
     ):
+        logger.debug(
+            f"Creating task for user {user_id}, chat {chat_id}, url {url}, platform {platform}, media_type {media_type}, media_id {media_id}"
+        )
         with self._session() as db:
             task = Task(
                 user_id=user_id,
@@ -23,12 +32,13 @@ class TaskManager(ModelManager):
             db.add(task)
             db.commit()
             task_id = task.id
-            print(f"Task {task_id} added, url: {url}")
+            logger.info(f"Task {task_id} added, url: {url}")
 
         return self.get_task_by_id(task_id)
 
     def get_task_by_id(self, task_id):
         if not task_id:
+            logger.error("No task_id provided")
             return None
         with self._session() as db:
             task = db.query(Task).filter(Task.id == task_id).first()
@@ -94,4 +104,4 @@ class TaskManager(ModelManager):
         with self._session() as db:
             merged_task = db.merge(task)
             db.commit()
-            print(f"Task {merged_task.id} merged and updated")
+            logger.info(f"Task {merged_task.id} merged and updated")

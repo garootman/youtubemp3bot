@@ -1,4 +1,10 @@
+import logging
 import os
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 def delete_files_by_chunk(folder, chunk):
@@ -9,7 +15,7 @@ def delete_files_by_chunk(folder, chunk):
             filepath = os.path.join(folder, file)
             os.remove(filepath)
             deleted.append(filepath)
-            print(f"Deleted by chunk {filepath}")
+            logger.info(f"Deleted by chunk {filepath}")
     return deleted
 
 
@@ -22,5 +28,5 @@ def delete_small_files(folder, chunk, size):
             if os.path.getsize(filepath) < size:
                 os.remove(filepath)
                 deleted.append(filepath)
-                print(f"Deleted by size less than {size} {filepath}")
+                logger.info(f"Deleted by size less than {size} {filepath}")
     return deleted

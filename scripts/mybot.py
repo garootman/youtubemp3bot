@@ -7,6 +7,8 @@ converts video to mp3
 sends mp3 file to user
 """
 
+import logging
+
 from aiogram import Bot, Dispatcher, F, Router, html
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
@@ -33,6 +35,12 @@ from tgmediabot.envs import (
 )
 from tgmediabot.paywall import AccessControlService
 from tgmediabot.taskmanager import TaskManager
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 
 db = SessionLocal
 create_db()
@@ -61,11 +69,12 @@ form_router = Router()
 
 
 def bump(message: Message) -> None:
+    logger.info(f"Bumping chat for chat id {message.chat.id}")
+    logger.debug(f"Bumping chat with message {message}")
     message_dict = message.dict()
     message_dict["full_name"] = message.from_user.full_name
-    # just in case
-    # message_dict = {}
     chatman.bump_noban(message.chat.id, message_dict=message_dict)
+    logger.info("Finished bumping chat with message")
 
 
 class BotState(StatesGroup):
@@ -77,6 +86,7 @@ class BotState(StatesGroup):
 async def command_start_handler(message: Message) -> None:
     bump(message)
     await message.answer(hello_msg.format(message.from_user.full_name))
+    logger.info(f"User {message.from_user.full_name} started the bot")
 
 
 @form_router.message(Command("feedback"))
@@ -85,19 +95,19 @@ async def feedback_command_handler(message: Message, state: FSMContext) -> None:
     # await FeedbackState.waiting_for_feedback.set()
     bump(message)
     await state.set_state(BotState.waiting_for_feedback)
+    logger.info(f"User {message.from_user.full_name} is sending feedback")
 
 
 @form_router.message(Command("cancel"))
 async def delete_chat_history(message: Message, state: FSMContext) -> None:
-    # a command to delete chat history
     await state.clear()
-    # await message.answer("Will clear chat history")
 
 
 @form_router.message(Command("subscribe"))
 async def payment_command_handler(message: Message, state: FSMContext) -> None:
     # gives a link to make payment
     # switches to payment state
+    bump(message)
     msg = (
         "You can make a payment here: "
         + PAY_LINK
@@ -105,6 +115,9 @@ async def payment_command_handler(message: Message, state: FSMContext) -> None:
     )
     await message.answer(msg)
     await state.set_state(BotState.waiting_for_payment)
+    logger.info(
+        f"User {message.from_user.id}: {message.from_user.full_name} is subscribing"
+    )
 
 
 @form_router.message(BotState.waiting_for_payment)
@@ -115,30 +128,43 @@ async def payment_message_handler(message: Message, state: FSMContext) -> None:
         "Your message was forwarded to the admin chat, await for confirmation. Usually takes 1-2 hours."
     )
     await state.clear()
+    logger.info(
+        f"User {message.from_user.id}: {message.from_user.full_name} sent payment"
+    )
 
 
 @form_router.message(BotState.waiting_for_feedback)
 async def feedback_message_handler(message: Message, state: FSMContext) -> None:
     # await bot.forward_message(ADMIN_ID, message.chat.id, message.message_id)
+    logger.info(f"Forwarding message to admin chat")
+    logger.debug(f"Message: {message}")
     await message.forward(ADMIN_ID)
     await message.answer(feedback_done)
     await state.clear()
+    logger.info(
+        f"User {message.from_user.id}: {message.from_user.full_name} sent feedback"
+    )
 
 
 @form_router.message()
 async def msg_handler(message: Message) -> None:
+    logger.info(f"Processing message")
+    logger.debug(f"Message: {message}")
     bump(message)
     links = extract_urls(message.text)
     if not links:
         await message.reply(no_yt_links)
+        logger.info("No youtube links found in the message, returning")
         return
     url = links[0]
-
+    logger.info(f"Extracted url: {url}")
     task = taskman.create_task(
         user_id=message.from_user.id, chat_id=message.chat.id, url=url
     )
+    logger.info(f"Created task {task.id}")
 
-    process_task.delay(task.id)
+    nt = process_task.delay(task.id)
+    logger.info(f"Task {task.id} sent to work queue: {nt}")
 
     """
     platform = extract_platform(url)
@@ -189,9 +215,6 @@ async def main() -> None:
 
 if __name__ == "__main__":
     import asyncio
-    import logging
-    import sys
 
-    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-    print("runnning bot...")
+    logger.info("Starting bot")
     asyncio.run(main())

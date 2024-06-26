@@ -38,7 +38,6 @@ def test_usage():
     db.commit()
     # check that get_user_tasks_in_hours returns 1
     new_task_count = usage_service.get_user_tasks_in_hours(user_id, 1)
-    print("NTC", new_task_count)
     assert new_task_count == 1
     # add task with created_at 2 hours ago, which is outside the 1 hour window
     new_task = Task(user_id=user_id, chat_id=chat_id, status="COMPLETE")

@@ -18,6 +18,14 @@ from tgmediabot.taskmanager import TaskManager
 taskman = TaskManager()
 chatman = ChatManager()
 
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
 tg_message_txt = """Hi 👋 bot admin here!
 Indian proxies online - now you can get youtube India-only content!
 Thank you for /feedback 🙏 
@@ -28,25 +36,25 @@ def send_upd_messages(ids, tg_message_txt, only_admin=True):
     sent = 0
     errors = 0
     if only_admin:
-        print("Sending to admin only")
+        logger.info("Sending to admin only")
         ids = [ADMIN_ID]
-    print(f"Sending to {len(ids)} users")
+    logger.info(f"Sending to {len(ids)} users")
     for user_tg_id in ids:
         if not user_tg_id:
             continue
         try:
             bot.send_message(chat_id=user_tg_id, text=tg_message_txt)
             time.sleep(5)
-            print(f"Sent message to {user_tg_id}")
+            logger.info(f"Sent message to {user_tg_id}")
             sent += 1
             chatman.bump_noban(user_tg_id)
         except Exception as e:
             errors += 1
-            print(f"Error sending message to {user_tg_id}: {e}")
+            logger.info(f"Error sending message to {user_tg_id}: {e}")
             if "bot was blocked" in str(e).lower():
                 chatman.ban_chat(user_tg_id)
 
-    print(f"Sent {sent} messages total, {errors} errors.")
+    logger.info(f"Sent {sent} messages total, {errors} errors.")
 
 
 if __name__ == "__main__":

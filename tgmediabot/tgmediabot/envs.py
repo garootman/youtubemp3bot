@@ -1,7 +1,14 @@
 # getting ENV variables
+import logging
 import os
 
 from dotenv import load_dotenv
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
 
 load_dotenv()
 
@@ -42,11 +49,11 @@ if not PROXY_TOKEN:
 
 ENV = os.getenv("ENV", "PROD")
 if ENV.lower() == "dev":
-    print("Running in dev mode")
+    logger.warning("Running in dev mode")
     POSTGRES_URL = "sqlite:///./test.db"
     REDIS_URL = "redis://localhost:6379/0"
 else:
-    print("Running in PROD mode:", ENV)
+    logger.warning("Running in PROD mode")
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -57,4 +64,4 @@ PAY_LINK = os.getenv("PAY_LINK", "")
 if not PAY_LINK:
     raise ValueError("No PAY_LINK set in .env")
 
-print(".env read successfully")
+logger.info(".env read successfully")

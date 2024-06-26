@@ -1,9 +1,19 @@
+import logging
 import os
 import random
 import re
 from abc import ABC, abstractmethod
 
 import requests
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+PROXY_API_URL = (
+    "https://proxy.webshare.io/api/v2/proxy/list/?mode=direct&page=1&page_size=100"
+)
 
 from tgmediabot.envs import PROXY_TOKEN
 
@@ -34,26 +44,31 @@ class ProxyRevolver:
         self._load_proxies()
 
         if not self.__proxies:
+            logger.error("No proxies loaded")
             return
         countries = set([i.get("country_code", "") for i in self.__proxies])
         self.countries = [i.upper() for i in countries if i]
-
-        print(
+        logger.info(
             f"Starting ProxyRevolver with {len(self.__proxies)} proxies, countries: {self.countries}"
         )
-
         self.__current = random.randint(0, len(self.__proxies) - 1)
 
     def _load_proxies(self):
         try:
+            logger.info("Loading proxies")
             response = requests.get(
-                "https://proxy.webshare.io/api/v2/proxy/list/?mode=direct&page=1&page_size=100",
+                PROXY_API_URL,
                 headers={"Authorization": self.__token},
             )
             data = response.json()
+            if not data:
+                logger.error("No data from proxy API")
+                return
             self.__proxies = data.get("results", [])
+            logger.info(f"Loaded {len(self.__proxies)} proxies")
+            logger.debug(f"Proxies: {self.__proxies}")
         except Exception as e:
-            print(f"Error loading proxies: {e}")
+            logger.error(f"Error loading proxies: {e}")
 
     def _proxy_to_http_syntax(self, proxy):
         if not proxy:
@@ -62,15 +77,18 @@ class ProxyRevolver:
 
     def check_proxy(self, proxy, timeout=5):
         try:
+            logger.debug(f"Checking proxy {proxy}")
             response = requests.get(
                 "http://api.ipify.org", proxies={"http": proxy}, timeout=timeout
             )
             if response.status_code == 200:
+                logger.debug(f"Proxy {proxy} is working")
                 return True
             else:
-                print(f"Proxy {proxy} is not working")
+                logger.error(f"Proxy {proxy} is not working")
+                logger.debug(f"Response: {response.text}")
         except Exception as e:
-            print(f"Proxy {proxy} is not working: {e}")
+            logger.error(f"Proxy {proxy} is not working: {e}")
         return False
 
     def get_any_proxy(self):
@@ -131,11 +149,15 @@ class ProxyRevolver:
         return None
 
     def get_checked_proxy_by_countries(self, countries_yes, countries_no, attempts=3):
+        logger.info(f"Getting proxy by countries: {countries_yes} not {countries_no}")
         if not self.__proxies:
             return None
         for _ in range(attempts):
             proxy = self.get_proxy_by_countries(countries_yes, countries_no)
             http_proxy = self._proxy_to_http_syntax(proxy)
             if self.check_proxy(http_proxy):
+                logger.info(f"Got a working proxy: {http_proxy}")
                 return http_proxy
+            logger.debug(f"Proxy {http_proxy} failed")
+        logger.error(f"Failed to get a proxy after {attempts} attempts")
         return None

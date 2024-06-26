@@ -1,10 +1,16 @@
 import inspect
+import logging
 import time
 import traceback
 from functools import wraps
 
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
-def retry(max_retries=3, delay=1, outfunc=print):
+
+def retry(max_retries=3, delay=1, outfunc=logger.error):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):

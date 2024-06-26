@@ -32,7 +32,6 @@ def test_get_yt_info():
 
     invalid_url = "https://www.youtube.com/watch?v="
     media_type, media_id = extract_youtube_info(invalid_url)
-    print(media_type, media_id)
     assert media_type is None
     assert media_id is None
 
@@ -67,4 +66,3 @@ if __name__ == "__main__":
     test_extract_urls()
     test_get_yt_info()
     test_extract_platform()
-    print("All tests passed!")

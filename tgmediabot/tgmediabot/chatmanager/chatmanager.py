@@ -1,7 +1,13 @@
 import json
+import logging
 
 from tgmediabot.database import Chat
 from tgmediabot.modelmanager import ModelManager
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class ChatManager(ModelManager):
@@ -10,18 +16,19 @@ class ChatManager(ModelManager):
         with self._session() as db:
             merged_chat = db.merge(chat)
             db.commit()
-            print(f"Chat {merged_chat.chat_id} merged and updated")
+            logger.debug(f"Chat {merged_chat.chat_id} merged and updated")
 
     def bump_noban(self, user_id, message_dict={}):
         chat = self._get_any_chat_obj(user_id, message_dict)
         chat.banned = False
-        print(f"Bumping chat {chat.chat_id}, banned: {chat.banned}")
+        logger.debug(f"NO-ban bumping chat {chat.chat_id}")
         self._update_chat(chat)
 
     def ban_chat(self, user_id, message_dict={}):
         chat = self._get_any_chat_obj(user_id, message_dict)
         chat.banned = True
         self._update_chat(chat)
+        logger.info(f"Chat {chat.chat_id} banned")
 
     def check_ban(self, chat_id):
         # checks if chat has a banned flag in the db
@@ -41,6 +48,7 @@ class ChatManager(ModelManager):
                 message_dict, default=str, ensure_ascii=False, indent=4
             ),
         )
+        logger.debug(f"Made chat from message {new_chat_object.chat_id}")
         return new_chat_object
 
     def _makeup_chat(self, chat_id):
@@ -48,10 +56,12 @@ class ChatManager(ModelManager):
         new_chat_object = Chat(
             chat_id=chat_id, username="", full_name="", message_json="{}"
         )
+        logger.debug(f"Made up chat {chat_id}")
         return new_chat_object
 
     def _get_any_chat_obj(self, chat_id, message_dict={}):
         chat = None
+        logger.debug(f"Getting chat {chat_id} and message {message_dict}")
         if message_dict:
             chat = self._message_to_chat(message_dict)
         else:
@@ -66,3 +76,5 @@ class ChatManager(ModelManager):
             if chat:
                 db.expunge(chat)
                 return chat
+        logger.debug(f"Chat {chat_id} not found")
+        return None
