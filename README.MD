@@ -5,9 +5,8 @@ Turns links to m4a audio files: works for various media platforms: YouTube, TikT
 
 ## Features
 
-- Any valid link work for YouTube
-- Some other big media work: VK, TikTok, some others
-- Possbile video duration is unlimited! 
+- Any valid link work for YouTube and other platforms, just try!
+- Works with audio duration up to 4 hours. 
 - Sends audio file directly to your Telegram chat
 
 ## Future updates
