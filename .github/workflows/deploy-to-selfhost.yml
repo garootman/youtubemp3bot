@@ -13,10 +13,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Copy .env file
-      run: |
-        cp /home/gituser/env_files/ytbot.env ./.env
-        
+      - name: Copy .env file
+        env:
+          ENV_FILE_PATH: ${{ secrets.ENV_FILE_PATH }}
+        run: |
+          cp $ENV_FILE_PATH ./.env
 
 
     - name: Build Docker Compose services

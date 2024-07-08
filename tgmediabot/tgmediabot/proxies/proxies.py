@@ -142,7 +142,7 @@ class ProxyRevolver:
             if proxy:
                 return proxy
         elif countries_no:
-            proxy = self._lookup_proxy_by_no_countries(countries_yes)
+            proxy = self._lookup_proxy_by_no_countries(countries_no)
             if proxy:
                 return proxy
 
