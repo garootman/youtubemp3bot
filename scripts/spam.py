@@ -25,11 +25,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-tg_message_txt = """Hi 👋 bot admin here!
-Indian proxies online - now you can get youtube India-only content!
-Thank you for /feedback 🙏 
-"""
+with open("text_spam.txt", "r") as myfile:
+    tg_message_txt = myfile.read()
 
 
 def send_upd_messages(ids, tg_message_txt, only_admin=True):
@@ -43,7 +40,9 @@ def send_upd_messages(ids, tg_message_txt, only_admin=True):
         if not user_tg_id:
             continue
         try:
-            bot.send_message(chat_id=user_tg_id, text=tg_message_txt)
+            bot.send_message(
+                chat_id=user_tg_id, text=tg_message_txt, parse_mode="Markdown"
+            )
             time.sleep(5)
             logger.info(f"Sent message to {user_tg_id}")
             sent += 1

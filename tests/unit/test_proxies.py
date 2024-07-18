@@ -32,10 +32,11 @@ def test_get_proxy_by_countries():
     assert p
     assert http_proxy_pattern.match(p)
 
+
 def test_get_proxy_ruby():
     # test proxy revolver: it loads
     countries = proxy_mgr.countries
-    cno = ['RU', 'BY']
+    cno = ["RU", "BY"]
     p = proxy_mgr.get_checked_proxy_by_countries(None, cno)
     assert p
     assert http_proxy_pattern.match(p)
