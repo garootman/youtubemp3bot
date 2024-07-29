@@ -1,7 +1,12 @@
 import pytest
 
-from tgmediabot.envs import GOOGLE_API_KEY
+from tgmediabot.envs import GOOGLE_API_KEY, PROXY_TOKEN
 from tgmediabot.medialib import YouTubeAPIClient
+
+yt_client = YouTubeAPIClient(
+    GOOGLE_API_KEY, "http://2dh5uiDTSX:vxQCr3xYC9Pbg46@103.47.52.201:8243"
+)
+
 
 yt = YouTubeAPIClient(GOOGLE_API_KEY)
 

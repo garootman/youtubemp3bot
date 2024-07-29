@@ -27,6 +27,7 @@ def split_audio(filepath, chunklenstr, file_size, timeout):
         "ffmpeg",
         "-loglevel",
         "error",
+        "-y",  # force rewrite
         "-i",
         filepath,
         "-c",
@@ -43,13 +44,14 @@ def split_audio(filepath, chunklenstr, file_size, timeout):
     ]
     logger.info(f"Splitting {filepath} into {chunklenstr} chunks")
     try:
-        logger.debug("Running ffmpeg command:", command)
+        command_str = " ".join([str(i) for i in command])
+        logger.debug(f"Running ffmpeg command: {command_str}")
         result = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout
         )
         logger.debug("ffmpeg result:", result)
     except subprocess.TimeoutExpired:
-        msg = f"ffmpeg subprocess expired timeuot {timeout} seconds"
+        msg = f"ffmpeg subprocess expired timeout {timeout} seconds"
         logger.error(msg)
         return [], "", msg
 

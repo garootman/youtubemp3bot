@@ -14,26 +14,33 @@ logger = logging.getLogger(__name__)
 class YouTubeAPIClient:
     # class to work with YT API
     # gets video metadata and other technical info
-    def __init__(self, api_key):
+    def __init__(self, api_key, proxy=None):
         logger.debug(f"Initializing YouTube API client with key {api_key[:5]}...")
         self.__api_key = api_key
+        msg = "YouTube API client initialized successfully!"
+        if proxy:
+            msg += f" Using proxy {proxy}"
+            self.__proxies = {"http": proxy, "https": proxy}
+        else:
+            self.__proxies = None
         selftest = self.self_test_apikey()
         if not selftest:
             logger.critical("API key is invalid")
             raise Exception("API key is invalid")
-        logger.info("YouTube API client initialized successfully!")
+
+        logger.info(msg)
 
     def self_test_apikey(self):
         # test if api key is valid - using API ping
         req_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=dQw4w9WgXcQ&key={self.__api_key}"
-        response = requests.get(req_url)
+        response = requests.get(req_url, proxies=self.__proxies)
         if response.status_code == 200:
             return True
         return False
 
     def get_video_metadata(self, video_id):
         req_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={video_id}&key={self.__api_key}"
-        response = requests.get(req_url)
+        response = requests.get(req_url, proxies=self.__proxies)
         if response.status_code == 200:
             return response.json()
         logger.info(
@@ -45,7 +52,7 @@ class YouTubeAPIClient:
     def get_video_snippet(self, vide_id):
         # gets video general info - title, channel, etc
         req_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={vide_id}&key={self.__api_key}"
-        response = requests.get(req_url)
+        response = requests.get(req_url, proxies=self.__proxies)
         if response.status_code == 200:
             return response.json()
         logger.info(

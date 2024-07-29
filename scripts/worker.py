@@ -29,6 +29,7 @@ from tgmediabot.medialib import (
 from tgmediabot.paywall import PaywallService
 from tgmediabot.proxies import ProxyRevolver
 from tgmediabot.splitter import (
+    convert_audio,
     delete_files_by_chunk,
     delete_small_files,
     get_chunk_duration_str,
@@ -52,7 +53,10 @@ if not os.path.exists(AUDIO_PATH):
 
 
 proxy_mgr = ProxyRevolver(PROXY_TOKEN)
-yt_client = YouTubeAPIClient(GOOGLE_API_KEY)
+
+yt_client = YouTubeAPIClient(
+    GOOGLE_API_KEY, proxy_mgr.get_checked_proxy_by_countries(["US"], [])
+)
 
 taskman = TaskManager()
 pws = PaywallService()
@@ -210,6 +214,14 @@ def process_task(task_id: str, cleanup=True):
         return
 
     dursec_str = get_chunk_duration_str(duration, filesize, MAX_FILE_SIZE)
+    file_name_mp3, err_to_mp3 = convert_audio(file_name, FFMPEG_TIMEOUT)
+    if file_name_mp3:
+        file_name = file_name_mp3
+        filesize = os.path.getsize(file_name) if os.path.exists(file_name) else 0
+        logger.info(f"Converted to mp3: {file_name}")
+    else:
+        logger.error(f"Error converting to mp3: {err_to_mp3}")
+
     local_files, std, err = split_audio(
         file_name, dursec_str, MAX_FILE_SIZE, FFMPEG_TIMEOUT
     )
