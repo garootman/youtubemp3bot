@@ -98,6 +98,17 @@ async def feedback_command_handler(message: Message, state: FSMContext) -> None:
     logger.info(f"User {message.from_user.full_name} is sending feedback")
 
 
+@form_router.message(Command("thanks"))
+async def thanks_command_handler(message: Message, state: FSMContext) -> None:
+    bump(message)
+    with open("thanks_msg.txt", "r") as f:
+        thanks_msg = f.read()
+    await message.answer(thanks_msg)
+    # await FeedbackState.waiting_for_feedback.set()
+    logger.info(f"User {message.from_user.full_name} said thanks")
+
+
+"""
 @form_router.message(Command("cancel"))
 async def delete_chat_history(message: Message, state: FSMContext) -> None:
     await state.clear()
@@ -131,6 +142,7 @@ async def payment_message_handler(message: Message, state: FSMContext) -> None:
     logger.info(
         f"User {message.from_user.id}: {message.from_user.full_name} sent payment"
     )
+"""
 
 
 @form_router.message(BotState.waiting_for_feedback)
