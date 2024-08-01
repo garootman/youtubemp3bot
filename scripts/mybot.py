@@ -14,8 +14,10 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message
+from aiogram.types import Message, LabeledPrice, PreCheckoutQuery
 from worker import process_task
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+  
 
 from tgmediabot.assist import (
     extract_platform,
@@ -103,9 +105,53 @@ async def thanks_command_handler(message: Message, state: FSMContext) -> None:
     bump(message)
     with open("thanks_msg.txt", "r") as f:
         thanks_msg = f.read()
-    await message.answer(thanks_msg)
+    await message.answer(thanks_msg, parse_mode=ParseMode.MARKDOWN)
     # await FeedbackState.waiting_for_feedback.set()
     logger.info(f"User {message.from_user.full_name} said thanks")
+    
+@form_router.message(Command("donate"))
+async def donta_start_handler(message: Message, state: FSMContext) -> None:
+    builder = InlineKeyboardBuilder()  
+    builder.button(text=f"Оплатить 1 ⭐️", pay=True)  
+    keyb = builder.as_markup()
+    prices = [LabeledPrice(label="XTR", amount=1)]  
+
+    
+    
+    await message.answer_invoice(  
+        title="Поддержка канала",  
+        description="Поддержать канал на 1 звёзд!",  
+        prices=prices,  
+        provider_token="",  
+        payload="channel_support",  
+        currency="XTR",  
+        reply_markup=keyb,  
+    )
+    
+@form_router.pre_checkout_query(F.invoice_payload == "channel_support")
+async def pre_checkout_query(query: PreCheckoutQuery) -> None:
+    # if your product is available for sale,
+    # confirm that you are ready to accept payment
+    await query.answer(ok=True)
+    logger.info(f"Pre checkout query OK: {query}")
+    
+@form_router.message(F.successful_payment)
+async def successful_payment(message: Message, bot: Bot) -> None:
+    """
+    await bot.refund_star_payment(
+        user_id=message.from_user.id,
+        telegram_payment_charge_id=message.successful_payment.telegram_payment_charge_id,
+    )
+    await message.answer("Thanks. Your payment has been refunded.")
+    """
+    await message.answer("Thanks. Your payment has been received!")
+
+@form_router.message(Command("stars"))
+async def check_star_balance(message: Message, bot: Bot) -> None:
+    bot_star_txns = await bot.get_star_transactions()
+    logger.info(f"Bot star transactions: {bot_star_txns}")
+    
+    
 
 
 """
@@ -173,10 +219,13 @@ async def msg_handler(message: Message) -> None:
     task = taskman.create_task(
         user_id=message.from_user.id, chat_id=message.chat.id, url=url
     )
-    logger.info(f"Created task {task.id}")
+    queue_len = len(taskman.get_current_queue())
+    logger.info(f"Created task {task.id}, current queue length: {queue_len}")
 
     nt = process_task.delay(task.id)
     logger.info(f"Task {task.id} sent to work queue: {nt}")
+    msg = f"Task added to queue, position: {queue_len}"
+    await message.answer(msg)
 
     """
     platform = extract_platform(url)

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class TaskManager(ModelManager):
     # class to work with DB model Task
     # includes methods to make all operations with Task
-
+    
     def create_task(
         self, user_id, chat_id, url, platform="", media_type="", media_id=""
     ):
@@ -35,6 +35,12 @@ class TaskManager(ModelManager):
             logger.info(f"Task {task_id} added, url: {url}")
 
         return self.get_task_by_id(task_id)
+    
+    def get_current_queue(self):
+        # returns tasks with status NEW or PROCESSING
+        with self._session() as db:
+            tasks = db.query(Task).filter(Task.status.in_(["NEW", "PROCESSING"])).all()
+            return tasks
 
     def get_task_by_id(self, task_id):
         if not task_id:
