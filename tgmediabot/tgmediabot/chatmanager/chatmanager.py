@@ -61,7 +61,7 @@ class ChatManager(ModelManager):
 
     def _get_any_chat_obj(self, chat_id, message_dict={}):
         chat = None
-        logger.debug(f"Getting chat {chat_id} and message {message_dict}")
+        #logger.debug(f"Getting chat {chat_id} and message {message_dict}")
         if message_dict:
             chat = self._message_to_chat(message_dict)
         else:

@@ -5,43 +5,55 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from tgmediabot.assist import utcnow
-from tgmediabot.database import Base, Payment
-from tgmediabot.paywall import PaywallService
+from tgmediabot.database import Base, Subscription, Task
+from tgmediabot.paywall import PayWallManager
+from tgmediabot.taskmanager import TaskManager
+
 
 engine = create_engine("sqlite:///:memory:", echo=False)
 SessionLocal = sessionmaker(bind=engine)
 db = SessionLocal
 Base.metadata.create_all(engine)
-pws = PaywallService(db)
+pwm = PayWallManager(db)
+taskmanager = TaskManager(db)
 
+
+"""
+buy_premium(self, user_id, package_type):
+def get_user_premium_sub(self, user_id):
+def calc_daily_usage(self, user_id):
+def check_daily_limit_left(self, user_id):
+def calc_task_limits(duration_seconds, format):
+def check_task_limits(self, user_id, duration_seconds, format):
+"""
 
 def test_paywall():
     now_plus_day = utcnow() + timedelta(days=1)
     now_minus_day = utcnow() - timedelta(days=1)
     user_id = 1234
-    # check that get_user_subscription returns None
-    assert pws.get_user_subscription(user_id) == None
-    # create a payment for 1 day from now
-    payment_id = pws.create_payment(user_id, 1, "test", "test", now_plus_day)
-    # check that get_user_subscription returns None as the payment is not approved
-    assert pws.get_user_subscription(user_id) == None
-    # approve the payment
-    pws.approve_payment(payment_id)
-    # check that get_user_subscription returns the date of the payment
-    assert pws.get_user_subscription(user_id) == now_plus_day
-    # delete the payment
-    pws.delete_payment(payment_id)
-    # check that get_user_subscription returns None
-    assert pws.get_user_subscription(user_id) == None
-    # create a payment for 1 day ago
-    payment_id = pws.create_payment(user_id, 1, "test", "test", now_minus_day)
-    # check that get_user_subscription returns None as the payment is expired
-    assert pws.get_user_subscription(user_id) == None
-    # delete the payment
-    pws.delete_payment(payment_id)
-    # check that get_user_subscription returns None
-    assert pws.get_user_subscription(user_id) == None
+    # test that user has 20 limits left 
+    # assert NOT premium
+    assert pwm.get_user_premium_sub(user_id) is None
+    assert pwm.check_daily_limit_left(user_id) == 20
+    
+    # add a task to the user, check that limits are reduced
+    task = taskmanager.create_task(
+        user_id=user_id, chat_id=user_id, url="NO URL"
+    )
+    
+    assert pwm.check_daily_limit_left(user_id) == 19
+    
+    # make user a premium user
+    pwm.buy_premium(user_id, "day")
+    
+    # assert premium
+    assert pwm.get_user_premium_sub(user_id) is not None
+    
+    # assert limits left is 499
+    assert pwm.check_daily_limit_left(user_id) == 499
+    
 
+    
 
 if __name__ == "__main__":
     test_paywall()

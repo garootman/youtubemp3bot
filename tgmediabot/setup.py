@@ -8,7 +8,7 @@ with open(os.path.join(current_dir, "requirements.txt")) as f:
 
 setup(
     name="tgmediabot",
-    version="0.1.2",
+    version="0.1.3",
     author="Garootman",
     author_email="",
     description="Lib to manage the Telegram bot",

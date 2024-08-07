@@ -1,15 +1,32 @@
+import re
+import os
 import random
-
 import pytest
 
+    
+from sqlalchemy.orm import sessionmaker
+from tgmediabot.database import Base
+from sqlalchemy import create_engine
+
+engine = create_engine("sqlite:///:memory:", echo=False)
+SessionLocal = sessionmaker(bind=engine)
+db = SessionLocal
+Base.metadata.create_all(engine)
+
+
+
 from tgmediabot.proxies import ProxyRevolver
+proxy_mgr = ProxyRevolver(db=db)
 
-proxy_mgr = ProxyRevolver()
 
-import re
+
+
+
 
 http_proxy_pattern = re.compile(r"http(s)?://(\w+:\w+@)?\d+\.\d+\.\d+\.\d+:\d+")
 
+
+# if database file exists, remove it
 
 def test_proxy_revolver():
     # test proxy revolver: it loads

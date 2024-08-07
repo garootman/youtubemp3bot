@@ -30,17 +30,21 @@ class YouTubeAPIClient:
 
         logger.info(msg)
 
+    @property
+    def proxy(self):
+        return self.__proxies["http"]
+
     def self_test_apikey(self):
         # test if api key is valid - using API ping
         req_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=dQw4w9WgXcQ&key={self.__api_key}"
-        response = requests.get(req_url, proxies=self.__proxies)
+        response = requests.get(req_url, proxies=self.__proxies, timeout=5)
         if response.status_code == 200:
             return True
         return False
 
     def get_video_metadata(self, video_id):
         req_url = f"https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id={video_id}&key={self.__api_key}"
-        response = requests.get(req_url, proxies=self.__proxies)
+        response = requests.get(req_url, proxies=self.__proxies, timeout=5)
         if response.status_code == 200:
             return response.json()
         logger.info(
@@ -52,7 +56,7 @@ class YouTubeAPIClient:
     def get_video_snippet(self, vide_id):
         # gets video general info - title, channel, etc
         req_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={vide_id}&key={self.__api_key}"
-        response = requests.get(req_url, proxies=self.__proxies)
+        response = requests.get(req_url, proxies=self.__proxies, timeout=5)
         if response.status_code == 200:
             return response.json()
         logger.info(

@@ -35,7 +35,8 @@ def extract_youtube_info(url):
 def extract_platform(url):
     platform_patterns = {
         "youtube": re.compile(
-            r"(?:https?://)?(?:www\.)?(?:youtube\.com|youtu\.be)", re.IGNORECASE
+            r"(?:https?://)?(?:www\.)?(?:music\.youtube\.com|youtube\.com/music|youtube\.com|youtu\.be)",
+            re.IGNORECASE,
         ),
         "facebook": re.compile(r"(?:https?://)?(?:www\.)?facebook\.com", re.IGNORECASE),
         "instagram": re.compile(

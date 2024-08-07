@@ -15,7 +15,7 @@ class TaskManager(ModelManager):
     # includes methods to make all operations with Task
     
     def create_task(
-        self, user_id, chat_id, url, platform="", media_type="", media_id=""
+        self, user_id, chat_id, url, platform="", media_type="", media_id="", priority=0, limits=1
     ):
         logger.debug(
             f"Creating task for user {user_id}, chat {chat_id}, url {url}, platform {platform}, media_type {media_type}, media_id {media_id}"
@@ -28,6 +28,8 @@ class TaskManager(ModelManager):
                 platform=platform,
                 media_type=media_type,
                 media_id=media_id,
+                priority=priority,
+                limits=limits,
             )
             db.add(task)
             db.commit()
@@ -111,3 +113,7 @@ class TaskManager(ModelManager):
             merged_task = db.merge(task)
             db.commit()
             logger.info(f"Task {merged_task.id} merged and updated")
+            # return merged_task free from session
+            db.expunge(merged_task)
+            return merged_task    
+        

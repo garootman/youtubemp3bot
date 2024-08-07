@@ -37,10 +37,13 @@ class Task(Base):
     channel = Column(String(256), default="")
     duration = Column(Integer, default=0)
     filesize = Column(BigInteger, default=0)
+    mode = Column(String(20), default="")
 
     error = Column(TEXT, default="")
     repeat = Column(Boolean, default=False)
     tg_file_id = Column(TEXT, default="")
+    limits = Column(Integer, default=1)
+    priority = Column(Integer, default=0)
 
     def __repr__(self):
         return f"<Task {self.id} {self.status} {self.url}>"

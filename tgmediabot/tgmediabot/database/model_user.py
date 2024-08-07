@@ -18,17 +18,16 @@ sys.path.append("..")
 from tgmediabot.assist import new_id, plainstring, utcnow
 
 
-class Chat(Base):
-    __tablename__ = "chats"
-    chat_id = Column(BigInteger, primary_key=True, index=True)
+class User(Base):
+    __tablename__ = "users"
+    id = Column(BigInteger, primary_key=True, index=True)
     updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
-    banned = Column(Boolean, default=False)
+    balance = Column(Integer, default=0)
     username = Column(String(256), default="")
     full_name = Column(String(256), default="")
-    message_json = Column(TEXT, default="{}")
     
     def __repr__(self):
-        return f"Chat: {self.chat_id} {self.full_name} {self.username} with balance: {self.balance} ⭐️"
-
+        return f"User: {self.id} {self.full_name} {self.username} with balance: {self.balance} ⭐️"
+    
     def __str__(self):
-        return f"Chat: {self.chat_id} {self.full_name} ({self.balance} ⭐️) {self.username}, banned: {self.banned} admin_banned: {self.admin_banned}"
+        return f"User: {self.id} {self.full_name} ({self.balance} ⭐️) {self.username}"

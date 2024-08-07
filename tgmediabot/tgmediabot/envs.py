@@ -49,7 +49,7 @@ if not PROXY_TOKEN:
 
 ENV = os.getenv("ENV", "PROD")
 if ENV.lower() == "dev":
-    logger.warning("Running in dev mode")
+    logger.warning("Running in DEV mode")
     POSTGRES_URL = "sqlite:///./test.db"
     REDIS_URL = "redis://localhost:6379/0"
 else:

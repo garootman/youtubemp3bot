@@ -48,7 +48,8 @@ def download_audio(url, filepath, proxy=None, platform="youtube", mediaformat=No
     with YoutubeDL(ydl_opts) as ydl:
         try:
             info_dict = ydl.extract_info(url, download=True)
-            logger.info(f"Downloaded {url} to {filepath}")
+            filesize_mb = round(os.path.getsize(filepath) / (1024 * 1024),2)
+            logger.info(f"Downloaded {filesize_mb} MB of {url} to {filepath}")
             return info_dict
         except Exception as e:
             logger.error(f"Error downloading {url}: {e}")

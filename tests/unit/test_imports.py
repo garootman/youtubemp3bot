@@ -13,7 +13,7 @@ def test_import_tgmediabot():
     import tgmediabot.proxies
     import tgmediabot.splitter
     import tgmediabot.taskmanager
-    import tgmediabot.taskprocessor
+    from tgmediabot.taskprocessor import TaskProcessor
     import tgmediabot.telelib
 
 

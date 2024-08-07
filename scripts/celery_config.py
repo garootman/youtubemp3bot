@@ -2,7 +2,7 @@ from celery import Celery
 from celery.schedules import crontab, timedelta
 from celery.signals import worker_ready
 
-from tgmediabot.envs import REDIS_URL
+from tgmediabot.envs import REDIS_URL#, REDIS_PASSWORD
 
 celery_app = Celery("worker", broker=REDIS_URL, backend=REDIS_URL)
 celery_app.autodiscover_tasks(["worker"])
