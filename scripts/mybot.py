@@ -147,7 +147,7 @@ async def premium_msg_handler(message: Message, state: FSMContext) -> None:
     builder.button(text="Week: 7⭐️", callback_data="premium_week")
     builder.button(text="Month: 30⭐️", callback_data="premium_month")
     markup = builder.as_markup()
-    await message.reply("Choose your premium package:", reply_markup=markup)
+    await message.reply("Premium users get 500 ⭐️ limits every 24 hours.\nChoose your premium package:", reply_markup=markup)
 
 
 # @form_router.callback_query(text_startswith="premium_")
@@ -283,7 +283,7 @@ async def msg_handler(message: Message) -> None:
     # with buttons to choose quality and format: audio m4a, mp3, 360, 720, 1080
     # add limits calculation and premium status
 
-    await send_choose_format_msg(message, task_id, user_limits)
+    await send_choose_format_msg(message, task_id, user_limits, user_premium)
 
 
 # method to process f"dotask_{task_id}_{format}") callback
@@ -319,7 +319,7 @@ async def dotask_callback(call: CallbackQuery) -> None:
     # await message.answer(msg)
 
 
-async def send_choose_format_msg(message: Message, task_id, user_limits) -> None:
+async def send_choose_format_msg(message: Message, task_id, user_limits, is_premium) -> None:
     media_objects = taskman.get_media_objects(task_id)
     if not media_objects:
         msg = "No videos found, sorry 🤷‍♂️ Try another link"
@@ -330,6 +330,12 @@ async def send_choose_format_msg(message: Message, task_id, user_limits) -> None
     # add limits calculation and premium status
 
     durlist = [i.duration for i in media_objects]
+
+    # if not premium and it is a yt_playlist, send message with premium offer
+    if not is_premium and len(media_objects) > 1:
+        msg = f"Playlists are available for /premium users only"
+        await message.reply(msg)
+        return
 
     builder = InlineKeyboardBuilder()
     for format in ["m4a", "mp3"]:  # , "360", "720"]:
