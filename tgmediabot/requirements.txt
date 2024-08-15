@@ -1,6 +1,6 @@
 aiogram==3.8.0
 celery==5.4.0
-pyTelegramBotAPI==4.19.1
+pyTelegramBotAPI
 pytest==8.0.2
 python-dotenv==1.0.1
 redis==5.0.5

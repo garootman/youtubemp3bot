@@ -14,12 +14,15 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message, LabeledPrice, PreCheckoutQuery, CallbackQuery, InlineKeyboardButton
-from worker import process_task, enrich_task
-from tgmediabot.taskprocessor import TaskProcessor
-
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    LabeledPrice,
+    Message,
+    PreCheckoutQuery,
+)
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-  
+from worker import enrich_tp_task, process_task
 
 from tgmediabot.assist import (
     extract_platform,
@@ -27,7 +30,6 @@ from tgmediabot.assist import (
     extract_youtube_info,
     utcnow,
 )
-
 from tgmediabot.chatmanager import ChatManager
 from tgmediabot.database import Base, SessionLocal, create_db, engine, session_scope
 from tgmediabot.envs import (
@@ -37,9 +39,9 @@ from tgmediabot.envs import (
     USAGE_PERIODIC_LIMIT,
     USAGE_TIMEDELTA_HOURS,
 )
-
 from tgmediabot.paywall import PayWallManager
 from tgmediabot.taskmanager import TaskManager
+from tgmediabot.taskprocessor import TaskProcessor
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -52,8 +54,6 @@ create_db()
 taskman = TaskManager(db)
 chatman = ChatManager(db)
 payman = PayWallManager(db)
-
-
 
 
 hello_msg = "Hello, {}! This bot is designed to download youtube videos and send them to you as mp3 files. To get started, send me a youtube link."
@@ -74,7 +74,7 @@ form_router = Router()
 
 def bump(message: Message) -> None:
     logger.info(f"Bumping chat for chat id {message.chat.id}")
-    logger.debug(f"Bumping chat with message {message}")
+    # logger.debug(f"Bumping chat with message {message}")
     message_dict = message.dict()
     message_dict["full_name"] = message.from_user.full_name
     chatman.bump_noban(message.chat.id, message_dict=message_dict)
@@ -83,7 +83,7 @@ def bump(message: Message) -> None:
 
 class BotState(StatesGroup):
     waiting_for_feedback = State()
-    
+
 
 @form_router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
@@ -107,52 +107,49 @@ async def thanks_command_handler(message: Message, state: FSMContext) -> None:
         thanks_msg = f.read()
     await message.answer(thanks_msg, parse_mode=ParseMode.MARKDOWN)
     logger.info(f"User {message.from_user.full_name} said thanks")
-    
-    
-    
+
+
 @form_router.message(Command("limits"))
 async def limits_command_handler(message: Message, state: FSMContext) -> None:
-    # check user current premium status, and limits left
     premium = payman.get_user_premium_sub(message.from_user.id)
     limits = payman.check_daily_limit_left(message.from_user.id)
     free = "free" if not premium else "premium"
-    msg = f"You use {free} version. Limits left: {limits}"
-    
+    msg = f"You use {free} version. 24-hour Limits left: {limits}"
+
     if premium:
         msg += f"\nPremium expires in {premium.end_date}"
     else:
         msg += "\nIf you want more, get /premium !"
     await message.reply(msg)
-        
-    
 
-    
+
 @form_router.message(Command("premium"))
 async def premium_msg_handler(message: Message, state: FSMContext) -> None:
-    
+
     # check user current premium status
     # if IS premium, return message with current premium status and expiration date + limits
-    
+
     premium = payman.get_user_premium_sub(message.from_user.id)
     limits = payman.check_daily_limit_left(message.from_user.id)
 
     if premium:
-        msg = f"Your premium access expires in {premium.end_date}. Limits left: {limits}"
+        msg = (
+            f"Your premium access expires in {premium.end_date}. Limits left: {limits}"
+        )
         await message.reply(msg)
         return
-    
-    
+
     # if NOT premium, return message with premium packages
-    
+
     builder = InlineKeyboardBuilder()
     builder.button(text="Day: 1⭐️", callback_data="premium_day")
     builder.button(text="Week: 7⭐️", callback_data="premium_week")
     builder.button(text="Month: 30⭐️", callback_data="premium_month")
     markup = builder.as_markup()
-    await message.reply("Choose your premium package:", reply_markup=markup)    
-   
-    
-#@form_router.callback_query(text_startswith="premium_")
+    await message.reply("Choose your premium package:", reply_markup=markup)
+
+
+# @form_router.callback_query(text_startswith="premium_")
 @form_router.callback_query(F.data.startswith("premium_"))
 async def premium_day_callback(call: CallbackQuery, state: FSMContext) -> None:
     if call.data == "premium_day":
@@ -167,7 +164,7 @@ async def premium_day_callback(call: CallbackQuery, state: FSMContext) -> None:
         title = "Premium Access - 1 Month"
         description = "Get access to premium features for 1 month."
         price = 30
-        
+
     builder = InlineKeyboardBuilder()
     builder.button(text=f"Pay {price} ⭐️", pay=True)
     prices = [LabeledPrice(label="XTR", amount=price)]
@@ -175,26 +172,26 @@ async def premium_day_callback(call: CallbackQuery, state: FSMContext) -> None:
     await call.message.answer_invoice(
         title=title,
         description=description,
-        prices=prices,  
-        provider_token="",  
-        payload= "premium_access",
-        currency="XTR",  
-        reply_markup=builder.as_markup(),  
+        prices=prices,
+        provider_token="",
+        payload="premium_access",
+        currency="XTR",
+        reply_markup=builder.as_markup(),
     )
 
-    
+
 @form_router.pre_checkout_query(F.invoice_payload == "premium_access")
 async def pre_checkout_query(query: PreCheckoutQuery) -> None:
     # if your product is available for sale,
     # confirm that you are ready to accept payment
     await query.answer(ok=True)
     logger.info(f"Pre checkout query OK: {query}")
-    
-    
+
+
 @form_router.message(F.successful_payment)
 async def successful_payment(message: Message, bot: Bot) -> None:
     # add premium access to user, based of amount paid
-    
+
     await bot.refund_star_payment(
         user_id=message.from_user.id,
         telegram_payment_charge_id=message.successful_payment.telegram_payment_charge_id,
@@ -213,16 +210,16 @@ async def successful_payment(message: Message, bot: Bot) -> None:
     await message.answer(msg)
 
     # notify admin about new premium user
-    await bot.send_message(ADMIN_ID, f"New premium user: @{message.from_user.username}, paid {amount} stars for {pack} package.")
-    
-
+    await bot.send_message(
+        ADMIN_ID,
+        f"New premium user: @{message.from_user.username}, paid {amount} stars for {pack} package.",
+    )
 
 
 @form_router.message(Command("stars"))
 async def check_star_balance(message: Message, bot: Bot) -> None:
     bot_star_txns = await bot.get_star_transactions()
     logger.info(f"Bot star transactions: {bot_star_txns}")
-    
 
 
 @form_router.message(BotState.waiting_for_feedback)
@@ -241,52 +238,109 @@ async def feedback_message_handler(message: Message, state: FSMContext) -> None:
 @form_router.message()
 async def msg_handler(message: Message) -> None:
     logger.info(f"Processing message")
-    logger.debug(f"Message: {message}")
+    # logger.debug(f"Message: {message}")
     bump(message)
     links = extract_urls(message.text)
     if not links:
         await message.reply(no_yt_links)
         logger.info("No youtube links found in the message, returning")
         return
-    
+
     user_limits = payman.check_daily_limit_left(message.from_user.id)
     user_premium = payman.get_user_premium_sub(message.from_user.id)
-    
+    priority = 0 if user_premium else 1
+
     if user_limits <= 0 and not user_premium:
-        msg = f"You spent all your daily limits. Get premium access to continue, or wait a little - we share 20 free uses every day."
+        msg = f"You spent all your daily limits. Get /premium access to continue, or wait a little - we share 20 free uses every day."
         await message.reply(msg)
         return
-    
+
     url = links[0]
 
-    
-    # {"m4a": 1, "mp3": 2, "360": 3, "720": 4, "1080": 5}
     logger.info(f"Extracted url: {url}")
     task = taskman.create_task(
-        user_id=message.from_user.id, chat_id=message.chat.id, url=url
+        user_id=message.from_user.id,
+        chat_id=message.chat.id,
+        url=url,
+        priority=priority,
     )
-    
+    task_id = task.id
+
     # user_limits = payman.check_daily_limit_left(message.from_user.id)
-    user_premium = payman.get_user_premium_sub(message.from_user.id)
-    priority = 0 if user_premium else 1
-    queue_len = len(taskman.get_current_queue())
-    logger.info(f"Created task {task.id}, current queue length: {queue_len}")
-    
-    # start a celery task 'process_task' with task id and priority
-    #nt = process_task.apply_async(args=[task.id], priority=priority)
-    rich_task = enrich_task.delay(task.id)
+    logger.info(f"Created task {task_id}")
+
+    wait_msg = await message.answer("Getting video info...")
+    # run task in foreground, get enrichment data with celery task "enrich_tp_task"
+    rich_task = enrich_tp_task(task_id)
+
     rich_dict = rich_task.__dict__
     msg = f"Got task data: {rich_dict}"
-    await message.answer(msg)
+    logger.info(msg)
+    await wait_msg.delete()
+    # send message  user: info of link metadata,
+    # with buttons to choose quality and format: audio m4a, mp3, 360, 720, 1080
+    # add limits calculation and premium status
 
-    
-    #nt = process_task.delay(task.id, priority=priority)
-    
-    #logger.info(f"Task {task.id} sent to work queue: {nt}")
-    #msg = f"Task added to queue, position: {queue_len}"
-    #await message.answer(msg)
+    await send_choose_format_msg(message, task_id, user_limits)
 
 
+# method to process f"dotask_{task_id}_{format}") callback
+@form_router.callback_query(F.data.startswith("dotask_"))
+async def dotask_callback(call: CallbackQuery) -> None:
+    task_id, format, star_price = call.data.split("_")[1:]
+    is_premium = payman.get_user_premium_sub(call.from_user.id)
+    priority = 0 if is_premium else 1
+
+    task = taskman.get_task_by_id(task_id)
+    user_limits = payman.check_daily_limit_left(call.from_user.id)
+    if user_limits < int(star_price):
+        await call.answer(
+            "Not enough stars to download this format. Get /premium access to continue."
+        )
+        return
+    queue_len = len(taskman.get_current_queue(priority))
+    task.format = format
+    task.status = "TO_PROCESS"
+    task.limits = int(star_price)
+    taskman.update_task(task)
+    nt = process_task.apply_async(args=[task.id], priority=task.priority)
+    logger.info(
+        f"Task {task.id} sent to work queue: {nt}, current queue length: {queue_len}"
+    )
+    msg = f"Task added to queue, position: {queue_len}"
+    await call.message.answer(msg)
+
+    # nt = process_task.delay(task.id, priority=priority)
+
+    # logger.info(f"Task {task.id} sent to work queue: {nt}")
+    # msg = f"Task added to queue, position: {queue_len}"
+    # await message.answer(msg)
+
+
+async def send_choose_format_msg(message: Message, task_id, user_limits) -> None:
+    media_objects = taskman.get_media_objects(task_id)
+    if not media_objects:
+        msg = "No videos found, sorry 🤷‍♂️ Try another link"
+        await message.answer(msg)
+        return
+    # send message  user: info of link metadata,
+    # with buttons to choose quality and format: audio m4a, mp3, 360, 720, 1080
+    # add limits calculation and premium status
+
+    durlist = [i.duration for i in media_objects]
+
+    builder = InlineKeyboardBuilder()
+    for format in ["m4a", "mp3"]:  # , "360", "720"]:
+        star_price = payman.calc_durlist_limits(durlist, format)
+        if star_price <= user_limits:
+            builder.button(
+                text=f"{format}: {star_price} ⭐️",
+                callback_data=f"dotask_{task_id}_{format}_{star_price}",
+            )
+    markup = builder.as_markup()
+    await message.reply(
+        "Looks like I can download it!\nSelect download format:", reply_markup=markup
+    )
 
 
 async def main() -> None:

@@ -1,9 +1,9 @@
-from tgmediabot.assist import utcnow, get_logger
-from tgmediabot.modelmanager import ModelManager
-from tgmediabot.database import User, Subscription, Task
-
-from datetime import timedelta, datetime
 import math
+from datetime import datetime, timedelta
+
+from tgmediabot.assist import get_logger, utcnow
+from tgmediabot.database import Subscription, Task, User
+from tgmediabot.modelmanager import ModelManager
 
 logger = get_logger(__name__)
 
@@ -21,7 +21,10 @@ class PayWallManager(ModelManager):
         expiry_date = start_date + timedelta(days=self.PREMIUM_DAYS[package_type])
         with self._session() as db:
             new_subscription = Subscription(
-                user_id=user_id, start_date=start_date, end_date=expiry_date, package_type=package_type
+                user_id=user_id,
+                start_date=start_date,
+                end_date=expiry_date,
+                package_type=package_type,
             )
             db.add(new_subscription)
             db.commit()
@@ -49,11 +52,13 @@ class PayWallManager(ModelManager):
                 db.query(Task)
                 .filter(Task.user_id == user_id)
                 .filter(Task.created_at >= utcnow() - timedelta(hours=24))
-                .filter(Task.status.in_(["COMPLETE", "NEW", "PROCESSING"]))
+                .filter(
+                    Task.status.in_(["COMPLETE", "NEW", "PROCESSING", "TO_PROCESS"])
+                )
                 .all()
             )
             limits = sum(task.limits for task in user_tasks)
-        
+
         logger.debug(
             f"Within 24 hours user {user_id} has {len(user_tasks)} chargable tasks with total limits {limits}"
         )
@@ -74,7 +79,9 @@ class PayWallManager(ModelManager):
         format_multiplier = PayWallManager.FORMAT_LIMITS[format]
         return n_10min_chunks * format_multiplier
 
-    def check_task_limits(self, user_id, duration_seconds, format):
-        task_limits = self.calc_task_limits(duration_seconds, format)
-        daily_limit_left = self.check_daily_limit_left(user_id)
-        return daily_limit_left >= task_limits
+    @staticmethod
+    def calc_durlist_limits(durlist, format):
+        limits = 0
+        for dur in durlist:
+            limits += PayWallManager.calc_task_limits(dur, format)
+        return limits

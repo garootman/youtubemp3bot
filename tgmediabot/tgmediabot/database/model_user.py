@@ -25,9 +25,9 @@ class User(Base):
     balance = Column(Integer, default=0)
     username = Column(String(256), default="")
     full_name = Column(String(256), default="")
-    
+
     def __repr__(self):
         return f"User: {self.id} {self.full_name} {self.username} with balance: {self.balance} ⭐️"
-    
+
     def __str__(self):
         return f"User: {self.id} {self.full_name} ({self.balance} ⭐️) {self.username}"

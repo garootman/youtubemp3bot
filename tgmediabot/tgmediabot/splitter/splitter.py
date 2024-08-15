@@ -11,10 +11,39 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def split_audio(filepath, chunklenstr, file_size, timeout):
-    if os.path.getsize(filepath) <= file_size:
-        logger.info(f"File {filepath} is smaller than {file_size}, not splitting")
+def get_bitrate(filepath):
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-show_entries",
+        "format=bit_rate",
+        "-of",
+        "default=noprint_wrappers=1:nokey=1",
+        filepath,
+    ]
+    try:
+        result = subprocess.run(
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10
+        )
+    except subprocess.TimeoutExpired:
+        msg = "ffprobe subprocess expired timeout 10 seconds"
+        logger.error(msg)
+        return 0
+
+    bitrate = int(result.stdout.decode().strip())
+    return bitrate
+
+
+def split_media(filepath, file_duration, max_size):
+    filesize = os.path.getsize(filepath)
+    timeout = file_duration + 10
+    if filesize <= max_size:
+        logger.info(f"File {filepath} is smaller than {max_size}, not splitting")
         return [filepath], "", ""
+    # bitrate = get_bitrate(filepath)
+    # get chunk_size with 10% overhead
+    chunklenstr = get_chunk_duration_str(file_duration, filesize, max_size)
 
     directory, filename = os.path.split(filepath)
     basename, file_ext = os.path.splitext(filename)
@@ -49,7 +78,8 @@ def split_audio(filepath, chunklenstr, file_size, timeout):
         result = subprocess.run(
             command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=timeout
         )
-        logger.debug("ffmpeg result:", result)
+        msg = f"ffmpeg subprocess finished with code {result.returncode}"
+        logger.debug(msg)
     except subprocess.TimeoutExpired:
         msg = f"ffmpeg subprocess expired timeout {timeout} seconds"
         logger.error(msg)

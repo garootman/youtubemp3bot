@@ -14,9 +14,8 @@ load_dotenv()
 
 AUDIO_PATH = "./audio"
 
-MAX_FILE_SIZE = 48 * 1024 * 1024  # 48 MB
+MAX_FILE_SIZE = 40 * 1024 * 1024  # 48 MB
 FFMPEG_TIMEOUT = 60  # 60 seconds
-FREE_MINUTES_MAX = 4 * 60  # 4 hours
 
 TG_TOKEN = os.getenv("TG_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")

@@ -26,7 +26,7 @@ class Chat(Base):
     username = Column(String(256), default="")
     full_name = Column(String(256), default="")
     message_json = Column(TEXT, default="{}")
-    
+
     def __repr__(self):
         return f"Chat: {self.chat_id} {self.full_name} {self.username} with balance: {self.balance} ⭐️"
 

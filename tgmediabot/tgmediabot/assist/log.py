@@ -1,4 +1,3 @@
-
 import logging
 
 logging.basicConfig(
@@ -6,5 +5,5 @@ logging.basicConfig(
 )
 
 
-def get_logger(name = __name__):
+def get_logger(name=__name__):
     return logging.getLogger(name)

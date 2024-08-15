@@ -32,10 +32,35 @@ def extract_youtube_info(url):
     return None, None
 
 
+def extract_plyalist_id(url):
+    # returns youtube playlist id from url
+    # also should work with all possible youtube playlist urls
+    # with music, with short, with embed, etc, also with post-url params
+    patterns = [
+        re.compile(
+            r"https?://(?:www\.)?(?:music\.)?(?:m\.)?youtube\.com/playlist\?list=([A-Za-z0-9_-]+)",
+            re.IGNORECASE,
+        ),
+        re.compile(
+            r"(?:https?://)?(?:www\.)?(?:music\.youtube\.com|youtube\.com|m\.youtube\.com|youtu\.be)/(?:playlist\?list=|embed/videoseries\?list=|watch\?v=)([A-Za-z0-9_-]+)",
+            re.IGNORECASE,
+        ),
+    ]
+    for pattern in patterns:
+        match = pattern.search(url)
+        if match:
+            return match.group(1)
+    return None
+
+
 def extract_platform(url):
     platform_patterns = {
         "youtube": re.compile(
-            r"(?:https?://)?(?:www\.)?(?:music\.youtube\.com|youtube\.com/music|youtube\.com|youtu\.be)",
+            r"(?:https?://)?(?:www\.)?(?:music\.youtube\.com|youtube\.com|youtu\.be)(?!/playlist\?list=[A-Za-z0-9_-]+)",
+            re.IGNORECASE,
+        ),
+        "yt_playlist": re.compile(
+            r"https?://(?:www\.)?(?:music\.)?youtube\.com/playlist\?list=[A-Za-z0-9_-]+",
             re.IGNORECASE,
         ),
         "facebook": re.compile(r"(?:https?://)?(?:www\.)?facebook\.com", re.IGNORECASE),

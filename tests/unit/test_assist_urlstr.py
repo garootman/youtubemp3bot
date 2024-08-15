@@ -1,6 +1,11 @@
 import pytest
 
-from tgmediabot.assist import extract_platform, extract_urls, extract_youtube_info
+from tgmediabot.assist import (
+    extract_platform,
+    extract_plyalist_id,
+    extract_urls,
+    extract_youtube_info,
+)
 
 
 def test_extract_urls():
@@ -12,6 +17,14 @@ def test_extract_urls():
         "https://www.youtube.com/watch?v=12345",
         "https://www.youtube.com/watch?v=67890",
     ]
+
+
+def test_extract_playlist_id():
+    with open("tests/unit/testdata_playlist_urls.txt", "r") as f:
+        ulr_list = f.readlines()
+    for pl in ulr_list:
+        playlist_id = extract_plyalist_id(pl)
+        assert playlist_id
 
 
 def test_get_yt_info():
@@ -66,3 +79,6 @@ if __name__ == "__main__":
     test_extract_urls()
     test_get_yt_info()
     test_extract_platform()
+    test_extract_playlist_id()
+
+    print("All tests passed")

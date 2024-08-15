@@ -21,7 +21,7 @@ class ChatManager(ModelManager):
     def bump_noban(self, user_id, message_dict={}):
         chat = self._get_any_chat_obj(user_id, message_dict)
         chat.banned = False
-        logger.debug(f"NO-ban bumping chat {chat.chat_id}")
+        # logger.debug(f"NO-ban bumping chat {chat.chat_id}")
         self._update_chat(chat)
 
     def ban_chat(self, user_id, message_dict={}):
@@ -61,7 +61,7 @@ class ChatManager(ModelManager):
 
     def _get_any_chat_obj(self, chat_id, message_dict={}):
         chat = None
-        #logger.debug(f"Getting chat {chat_id} and message {message_dict}")
+        # logger.debug(f"Getting chat {chat_id} and message {message_dict}")
         if message_dict:
             chat = self._message_to_chat(message_dict)
         else:

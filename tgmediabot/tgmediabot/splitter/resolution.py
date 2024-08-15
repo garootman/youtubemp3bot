@@ -8,7 +8,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def convert_audio(filepath, timeout=60):
+def get_resolution(filepath, timeout=60):
     directory, filename = os.path.split(filepath)
     basename, file_ext = os.path.splitext(filename)
     output_filename = os.path.join(directory, basename + file_ext)
@@ -23,21 +23,19 @@ def convert_audio(filepath, timeout=60):
         return "", msg
 
     command = [
-        "ffmpeg",
-        "-loglevel",
-        "error",  # только ошибки
-        "-y",  # force rewrite
-        "-i",
-        filepath,  # входной файл
-        # "-ar", "44100",  # частота дискретизации
-        # "-q:a", "2",  # качество аудио
-        # "-b:a", "128k",  # битрейт аудио
-        "-f",
-        "mp3",  # выходной формат
-        output_filename,  # выходной файл
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "v:0",
+        "-show_entries",
+        "stream=width,height",
+        "-of",
+        "csv=s=x:p=0",
+        filepath,
     ]
 
-    logger.info(f"Converting {filepath} mp3 file")
+    logger.info(f"Getting resolution for {filepath}")
     try:
         command_str = " ".join([str(i) for i in command])
         logger.debug(f"Running ffmpeg command: {command_str}")
@@ -49,8 +47,15 @@ def convert_audio(filepath, timeout=60):
     except subprocess.TimeoutExpired:
         msg = f"ffmpeg subprocess expired timeout {timeout} seconds"
         logger.error(msg)
-        return "", msg
+        return 0, 0
 
-    logger.debug(f"Converted files to mp3: {output_filename}")
+    logger.debug(f"Got resolution: {result.stdout}")
+    resolution = result.stdout.decode("utf-8").strip()
+    if not resolution:
+        msg = f"ffmpeg returned empty resolution"
+        logger.error(msg)
+        return 0, 0
 
-    return output_filename, ""
+    width, height = resolution.split("x")
+    width, height = int(width), int(height)
+    return width, height

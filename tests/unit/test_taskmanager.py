@@ -18,9 +18,9 @@ def test_taskmanager_new_task():
     task = taskman.create_task(1, 1, "url", "platform", "media_type", "media_id")
 
     assert taskman.count_all() == 1
-    
+
     # assert queue length is 1
-    assert len(taskman.get_current_queue()) == 1
+    assert len(taskman.get_current_queue(0)) == 1
 
     task_id = task.id
 
@@ -41,8 +41,6 @@ def test_taskmanager_new_task():
     # test get_new_tasks
     new_tasks = taskman.get_new_task_ids()
     assert len(new_tasks) == 1
-    
-
 
     # test update_task
     task.status = "COMPLETE"

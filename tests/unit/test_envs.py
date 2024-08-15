@@ -7,7 +7,6 @@ def test_get_env():
         AUDIO_PATH,
         ENV,
         FFMPEG_TIMEOUT,
-        FREE_MINUTES_MAX,
         GOOGLE_API_KEY,
         MAX_FILE_SIZE,
         PAY_LINK,

@@ -2,16 +2,13 @@ import logging
 import os
 import random
 import re
+import time
 from abc import ABC, abstractmethod
 
 import requests
 
-from tgmediabot.database import ProxyUse
+from tgmediabot.database import ProxyUse, SessionLocal
 from tgmediabot.modelmanager import ModelManager
-from tgmediabot.database import SessionLocal
-
-import time
-
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -19,6 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from tgmediabot.envs import PROXY_TOKEN
+
 PROXY_API_URL = (
     "https://proxy.webshare.io/api/v2/proxy/list/?mode=direct&page=1&page_size=100"
 )
@@ -73,7 +71,7 @@ class ProxyRevolver(ModelManager):
             return
         self.__proxies = data.get("results", [])
         logger.info(f"Loaded {len(self.__proxies)} proxies")
-        #logger.debug(f"Proxies: {self.__proxies}")
+        # logger.debug(f"Proxies: {self.__proxies}")
 
     def save_proxy_use(self, proxy, use_type, task_id, url, speed, success, error):
         """
@@ -87,6 +85,7 @@ class ProxyRevolver(ModelManager):
         error = Column(TEXT, default="")
         """
         import random
+
         use_id = random.randint(100000, 999999)
         with self._session() as db:
             npu = ProxyUse(
@@ -102,8 +101,7 @@ class ProxyRevolver(ModelManager):
             db.add(npu)
             db.commit()
             logger.debug(f"Saved proxy use: {npu}")
-            return npu            
-            
+            return npu
 
     def _proxy_to_http_syntax(self, proxy):
         if not proxy:
@@ -113,6 +111,8 @@ class ProxyRevolver(ModelManager):
     def check_proxy(self, proxy, timeout=5):
         stt = time.perf_counter()
         error, size, speed = "", 0, 0
+        if not proxy:
+            raise ValueError("No proxy provided")
         try:
             logger.debug(f"Checking proxy {proxy}")
             response = requests.get(
@@ -136,13 +136,14 @@ class ProxyRevolver(ModelManager):
             task_id="",
             url="http://api.ipify.org",
             speed=speed,
-            success = False if error else True,
-            error= error
+            success=False if error else True,
+            error=error,
         )
 
         return not error
 
     def get_any_proxy(self):
+        logger.debug(f"Getting any proxy")
         if not self.__proxies:
             return None
         proxy = self.__proxies[self.__current]

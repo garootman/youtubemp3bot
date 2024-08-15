@@ -28,27 +28,30 @@ def get_media_info(url, proxy=None):
             return {"error": str(e)}
 
 
-def download_audio(url, filepath, proxy=None, platform="youtube", mediaformat=None):
-    logger.info(f"Downloading audio from {url} to {filepath}")
+def download_audio(url, filepath, proxy=None, platform="youtube", media="m4a"):
+    mediaformat = f"{platform}_{media}"
+    logger.info(f"Downloading media from {url} to {filepath} with format {mediaformat}")
     logger.debug(f"Platform: {platform}, format: {mediaformat}, proxy: {proxy}")
-    if not platform or platform not in DOWNLOAD_OPTIONS:
+    if not mediaformat or mediaformat not in DOWNLOAD_OPTIONS:
         ydl_opts = DOWNLOAD_OPTIONS["default"].copy()
-        logger.info(f"Unknown platform {platform}, using default options: default")
+        logger.info(f"Unknown platform {mediaformat}, using default options: default")
     else:
-        ydl_opts = DOWNLOAD_OPTIONS[platform].copy()
-        logger.info(f"Using platform {platform} options")
+        ydl_opts = DOWNLOAD_OPTIONS[mediaformat].copy()
+        logger.info(f"Using platform {mediaformat} options")
 
     ydl_opts["outtmpl"] = filepath
     if proxy:
         ydl_opts["proxy"] = proxy
+    else:
+        ydl_opts.pop("proxy", None)
 
-    if mediaformat:
-        ydl_opts["format"] = mediaformat
+    # if mediaformat:
+    #    ydl_opts["format"] = mediaformat
 
     with YoutubeDL(ydl_opts) as ydl:
         try:
             info_dict = ydl.extract_info(url, download=True)
-            filesize_mb = round(os.path.getsize(filepath) / (1024 * 1024),2)
+            filesize_mb = round(os.path.getsize(filepath) / (1024 * 1024), 2)
             logger.info(f"Downloaded {filesize_mb} MB of {url} to {filepath}")
             return info_dict
         except Exception as e:

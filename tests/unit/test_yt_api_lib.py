@@ -1,12 +1,7 @@
 import pytest
 
-from tgmediabot.envs import GOOGLE_API_KEY, PROXY_TOKEN
+from tgmediabot.envs import GOOGLE_API_KEY
 from tgmediabot.medialib import YouTubeAPIClient
-
-yt_client = YouTubeAPIClient(
-    GOOGLE_API_KEY, "http://2dh5uiDTSX:vxQCr3xYC9Pbg46@103.47.52.201:8243"
-)
-
 
 yt = YouTubeAPIClient(GOOGLE_API_KEY)
 
@@ -40,6 +35,14 @@ def test_missing_video():
     assert not duration
     assert not countries_yes
     assert not countries_no
+
+
+def test_get_playlist_info():
+    plid = "PLyy-7U8Nf9Sq9L5lF-W9eRtH9cPsw7fBi"
+    links = yt.get_playlist_media_links(plid)
+    assert links
+    assert isinstance(links, list)
+    assert len(links) > 5
 
 
 if __name__ == "__main__":

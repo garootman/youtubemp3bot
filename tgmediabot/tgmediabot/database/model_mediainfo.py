@@ -18,17 +18,13 @@ sys.path.append("..")
 from tgmediabot.assist import new_id, plainstring, utcnow
 
 
-class Task(Base):
-    __tablename__ = "tasks"
+class MediaInfo(Base):
+    __tablename__ = "mediainfo"
     id = Column(String(20), primary_key=True, index=True, default=new_id)
-    user_id = Column(BigInteger, nullable=False)
-    chat_id = Column(BigInteger, nullable=False)
-    created_at = Column(DateTime, default=utcnow, nullable=False)
-    updated_at = Column(DateTime, default=utcnow, onupdate=utcnow, nullable=False)
-    status = Column(String(20), default="NEW", nullable=False)
-    url = Column(TEXT, default="", nullable=False)
+    task_id = Column(String(20), nullable=False)
+    url = Column(String(256), default="")
+    updated_at = Column(DateTime, default=utcnow, nullable=False)
 
-    """
     platform = Column(String(20), default="")
     media_type = Column(String(20), default="")
     media_id = Column(String(20), default="")
@@ -38,15 +34,14 @@ class Task(Base):
     channel = Column(String(256), default="")
     duration = Column(Integer, default=0)
     filesize = Column(BigInteger, default=0)
-    """
-    format = Column(String(20), default="")
+
     error = Column(TEXT, default="")
-    repeat = Column(Boolean, default=False)
-    limits = Column(Integer, default=0)
-    priority = Column(Integer, default=0)
+    tg_file_id = Column(TEXT, default="")
+
+    islive = Column(Boolean, default=False)
 
     def __repr__(self):
-        return f"<Task {self.id} {self.status} {self.url}>"
+        return f"<MediaInfo {self.id} {self.media_id} {self.title}>"
 
     def __str__(self):
-        return f"Task: {self.id} {self.status} from {self.updated_at}: url {self.url}"
+        return f"{self.media_id} {self.url}: {self.channel} - {self.title}, duration {self.duration} seconds"

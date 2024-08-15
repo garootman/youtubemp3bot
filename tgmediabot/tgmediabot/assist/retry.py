@@ -10,7 +10,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def retry(max_retries=3, delay=1, outfunc=logger.error):
+def retry(max_retries=3, delay=1, outfunc=logger.error, raise_last=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -29,7 +29,9 @@ def retry(max_retries=3, delay=1, outfunc=logger.error):
                     last_exception = e
                     time.sleep(delay)
 
-            raise last_exception
+            if raise_last:
+                raise last_exception
+            return None
 
         return wrapper
 

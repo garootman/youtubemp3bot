@@ -33,6 +33,14 @@ def send_audio(*args, **kwargs):
 
 
 @retry()
+def send_video(*args, **kwargs):
+    # universdal fnc to wrap send msg
+    logger.debug(f"Sending videos: {args}, {kwargs}")
+    msg = bot.send_video(*args, **kwargs)
+    return msg
+
+
+@retry()
 def delete_messages(chat_id, msg_batch):
     logger.debug(f"Deleting messages: {msg_batch}")
     for msg in msg_batch:
@@ -45,42 +53,71 @@ def delete_messages(chat_id, msg_batch):
     return True
 
 
-def mass_send_audio(chat_id, audio_list, mode, title):
+def mass_send_audio(
+    chat_id, audio_list, mode, title, format_type="audio", width=0, height=0
+):
+    if not format_type:
+        format_type = "audio"
     sent = []
     logger.debug(
-        f"Sending {len(audio_list)} audio files to {chat_id} with mode {mode}:\n{audio_list}"
+        f"Sending {len(audio_list)} {format_type} files to {chat_id} with mode {mode}:\n{audio_list}"
     )
     for i, audio in enumerate(audio_list):
+        if len(audio_list) > 1:
+            tit = f"{title}_{i+1}"
+        else:
+            tit = f"{title}"
+
         if mode == "MEDIA":
             audio_object = InputMediaAudio(media=audio)
+            if format_type == "audio":
+                xi = send_audio(chat_id=chat_id, audio=audio_object, caption=tit)
+            else:
+                xi = send_video(
+                    chat_id=chat_id,
+                    video=audio_object,
+                    caption=tit,
+                    width=width,
+                    height=height,
+                )
+
         elif mode == "FILE":
             if os.path.exists(audio):
-                audio_object = open(audio, "rb")
+                filesize = os.path.getsize(audio)
+                logger.debug(f"Sending to {chat_id} file {audio} with size {filesize}")
+                with open(audio, "rb") as audio_object:
+                    if format_type == "audio":
+                        xi = send_audio(
+                            chat_id=chat_id, audio=audio_object, caption=tit
+                        )
+                    else:
+                        xi = send_video(
+                            chat_id=chat_id,
+                            video=audio_object,
+                            caption=tit,
+                            width=width,
+                            height=height,
+                            timeout=60,
+                        )
+
+                # audio_object = open(audio, "rb")
             else:
                 logger.error(f"File {audio} does not exist!")
                 sent.append(None)
                 continue
         # if there is more than one audio file, add index to title
-        if len(audio_list) > 1:
-            tit = f"{title}_{i+1}"
-        else:
-            tit = f"{title}"
-        xi = send_audio(
-            chat_id=chat_id,
-            audio=audio_object,
-            caption=tit,
-        )
+
         if xi:
             logger.info(
-                f"Sent audio chunk {i} of {len(audio_list)} to {chat_id}, sleeping 1 sec."
+                f"Sent {format_type} chunk {i} of {len(audio_list)} to {chat_id}, sleeping 1 sec."
             )
             time.sleep(1)
         else:
-            logger.error(f"Error sending voice by {mode}")
+            logger.error(f"Error sending {format_type} by {mode}")
             xi = None
         sent.append(xi)
     if not all(sent):
-        logger.error("Not all data was sent to chat {chat_id} with mode {mode}")
+        logger.error(f"Not all data was sent to chat {chat_id} with mode {mode}")
         delete_messages(chat_id, sent)
         sent = []
     return sent

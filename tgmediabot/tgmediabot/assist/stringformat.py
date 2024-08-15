@@ -1,8 +1,10 @@
 import uuid
 
 
-def new_id():
-    return str(uuid.uuid4())[:8]
+def new_id(l=12):
+    s = str(uuid.uuid4())
+    s = s.replace("-", "").replace("_", "")
+    return s[:l]
 
 
 def plainstring(msg, maxlen=30):
