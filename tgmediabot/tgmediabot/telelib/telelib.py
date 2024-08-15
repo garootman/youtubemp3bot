@@ -118,6 +118,6 @@ def mass_send_audio(
         sent.append(xi)
     if not all(sent):
         logger.error(f"Not all data was sent to chat {chat_id} with mode {mode}")
-        delete_messages(chat_id, sent)
+        # delete_messages(chat_id, sent)
         sent = []
     return sent

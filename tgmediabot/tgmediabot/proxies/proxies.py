@@ -112,7 +112,7 @@ class ProxyRevolver(ModelManager):
         stt = time.perf_counter()
         error, size, speed = "", 0, 0
         if not proxy:
-            raise ValueError("No proxy provided")
+            return True
         try:
             logger.debug(f"Checking proxy {proxy}")
             response = requests.get(

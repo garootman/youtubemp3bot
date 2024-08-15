@@ -183,3 +183,4 @@ app/test.db
 app/cookies.txt
 app/.proxylist.txt
 app/.proxylist.env
+scripts/chats.txt

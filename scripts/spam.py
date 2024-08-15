@@ -65,7 +65,12 @@ if __name__ == "__main__":
         GO_SEND = sys.argv[1].lower() == "true"
     ADMIN_ONLY = not GO_SEND
 
-    ids = taskman.get_unique_user_ids()
-    # shuffle ids
+    # ids = taskman.get_unique_user_ids()
+    with open("chats.txt", "r") as myfile:
+        ids = myfile.read().splitlines()
+    ids = [int(i) for i in ids if i]
+    ids = list(set(ids))
+
     isd = random.sample(ids, len(ids))
+    print(f"I have {len(ids)} users")
     send_upd_messages(ids, tg_message_txt, only_admin=ADMIN_ONLY)

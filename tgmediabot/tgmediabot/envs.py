@@ -19,10 +19,13 @@ FFMPEG_TIMEOUT = 60  # 60 seconds
 
 TG_TOKEN = os.getenv("TG_TOKEN")
 ADMIN_ID = os.getenv("ADMIN_ID")
+OWNER_ID = os.getenv("OWNER_ID")
 if not TG_TOKEN:
     raise ValueError("No TG_TOKEN set in .env")
 if not ADMIN_ID:
     raise ValueError("No ADMIN_ID set in .env")
+if not OWNER_ID:
+    raise ValueError("No OWNER_ID set in .env")
 
 
 USAGE_TIMEDELTA_HOURS = int(os.getenv("USAGE_TIMEDELTA_HOURS", 24))

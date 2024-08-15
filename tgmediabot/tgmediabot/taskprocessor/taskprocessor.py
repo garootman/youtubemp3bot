@@ -35,11 +35,8 @@ from tgmediabot.medialib import download_audio, fix_file_name, get_media_info
 
 # from tgmediabot.paywall import PayWallManager
 # from tgmediabot.proxies import ProxyRevolver
-from tgmediabot.splitter import (
-    convert_audio,  # delete_files_by_chunk,
-    get_resolution,
-    split_media,
-)
+from tgmediabot.splitter import convert_audio  # delete_files_by_chunk,
+from tgmediabot.splitter import get_resolution, split_media
 
 # from tgmediabot.taskmanager import TaskManager
 from tgmediabot.telelib import delete_messages, mass_send_audio, send_msg
@@ -157,10 +154,10 @@ class TaskProcessor:
             logger.error(
                 f"Error downloading audio: {resdict.get('error', 'Unknown error')}"
             )
-            return None
+            return None, resdict.get("error")
 
         file_name = fix_file_name(file_name, self.task_id)
-        return file_name
+        return file_name, None
 
     def process(self, cleanup=True, ignore_status=False):
         # returns all the fucking results!
@@ -203,7 +200,7 @@ class TaskProcessor:
             width, height = 0, 0
             file_name = os.path.join(taskfolder, f"{media.id}.{ext}")
             # download_media(url, proxy_url, file_name, platform, media):
-            file_name = self.download_media(
+            file_name, dl_error = self.download_media(
                 media.url, proxy_url, file_name, media.platform, self.task.format
             )
             if not file_name or not os.path.exists(file_name):
@@ -217,6 +214,8 @@ class TaskProcessor:
                 )
                 self.task.status = "ERROR"
                 self.task.error = "Not downloaded properly"
+                if dl_error:
+                    self.task.error += f": {dl_error}"
                 self.taskman.update_task(self.task)
                 send_msg(
                     chat_id=self.task.chat_id,
@@ -283,9 +282,9 @@ class TaskProcessor:
                     chat_id=self.task.chat_id,
                     text="Error downloading audio, please try again later",
                 )
-                send_msg(
-                    chat_id=ADMIN_ID, text=f"Error sending msg for task {self.task_id}"
-                )
+                #                send_msg(
+                #                    chat_id=ADMIN_ID, text=f"Error sending msg for task {self.task_id}"
+                #                )
                 logger.info(f"Task {self.task_id} not complete: error sending messages")
                 media.tg_file_id = ",".join([str(i.audio.file_id) for i in x if i])
                 media.filesize = filesize

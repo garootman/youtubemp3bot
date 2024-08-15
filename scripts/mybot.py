@@ -34,6 +34,7 @@ from tgmediabot.chatmanager import ChatManager
 from tgmediabot.database import Base, SessionLocal, create_db, engine, session_scope
 from tgmediabot.envs import (
     ADMIN_ID,
+    OWNER_ID,
     PAY_LINK,
     TG_TOKEN,
     USAGE_PERIODIC_LIMIT,
@@ -114,7 +115,7 @@ async def limits_command_handler(message: Message, state: FSMContext) -> None:
     premium = payman.get_user_premium_sub(message.from_user.id)
     limits = payman.check_daily_limit_left(message.from_user.id)
     free = "free" if not premium else "premium"
-    msg = f"You use {free} version. 24-hour Limits left: {limits}"
+    msg = f"You use {free} version. 24-hour Limits left: {limits} ⭐️"
 
     if premium:
         msg += f"\nPremium expires in {premium.end_date}"
@@ -191,12 +192,13 @@ async def pre_checkout_query(query: PreCheckoutQuery) -> None:
 @form_router.message(F.successful_payment)
 async def successful_payment(message: Message, bot: Bot) -> None:
     # add premium access to user, based of amount paid
-
+    """
     await bot.refund_star_payment(
         user_id=message.from_user.id,
         telegram_payment_charge_id=message.successful_payment.telegram_payment_charge_id,
     )
     await message.answer("Thanks. Your payment has been refunded.")
+    """
 
     amount = message.successful_payment.total_amount
     if amount == 1:
@@ -334,7 +336,7 @@ async def send_choose_format_msg(message: Message, task_id, user_limits) -> None
         star_price = payman.calc_durlist_limits(durlist, format)
         if star_price <= user_limits:
             builder.button(
-                text=f"{format}: {star_price} ⭐️",
+                text=f"{format}: {star_price}⭐️",
                 callback_data=f"dotask_{task_id}_{format}_{star_price}",
             )
     markup = builder.as_markup()
