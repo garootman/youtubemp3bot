@@ -119,7 +119,7 @@ class TaskManager(ModelManager):
         with self._session() as db:
             tasks = (
                 db.query(Task)
-                .filter(Task.status.in_(["NEW", "PROCESSING"]))
+                .filter(Task.status.in_(["NEW", "PROCESSING", "TO_PROCESS"]))
                 .filter(Task.priority <= priority)
                 .all()
             )

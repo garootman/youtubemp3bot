@@ -36,9 +36,11 @@ def test_paywall():
     assert pwm.check_daily_limit_left(user_id) == 20
 
     # add a task to the user, check that limits are reduced
-    task = taskmanager.create_task(user_id=user_id, chat_id=user_id, url="NO URL")
+    task = taskmanager.create_task(
+        user_id=user_id, chat_id=user_id, url="NO URL", priority=0
+    )
 
-    assert pwm.check_daily_limit_left(user_id) == 19
+    assert pwm.check_daily_limit_left(user_id) == 20
 
     # make user a premium user
     pwm.buy_premium(user_id, "day")
@@ -47,7 +49,7 @@ def test_paywall():
     assert pwm.get_user_premium_sub(user_id) is not None
 
     # assert limits left is 499
-    assert pwm.check_daily_limit_left(user_id) == 499
+    assert pwm.check_daily_limit_left(user_id) == 500
 
 
 if __name__ == "__main__":

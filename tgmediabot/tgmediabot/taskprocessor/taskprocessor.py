@@ -51,6 +51,9 @@ if not os.path.exists(AUDIO_PATH):
 
 
 class TaskProcessor:
+
+    max_urls = 20
+
     def __init__(self, proxymanager, taskmanager, ytclient, payman, task_id=None):
         self.proxyman = proxymanager
         self.taskman = taskmanager
@@ -63,7 +66,7 @@ class TaskProcessor:
         logger.info(f"TaskProcessor initialized with task id {self.task_id}")
 
     # @retry()
-    def enrich_task(self, ignore_status=False, max_urls=20):
+    def enrich_task(self, ignore_status=False):
         logger.info(f"Enriching task {self.task_id}")
         task = self.taskman.get_task_by_id(self.task_id)
         if not task:
@@ -86,7 +89,7 @@ class TaskProcessor:
         error = ""
         media_type, media_id = "", ""
 
-        for url in links[:max_urls]:
+        for url in links[: self.max_urls]:
             if platform == "youtube":
                 media_type, media_id = extract_youtube_info(url)
                 title, channel, duration, countries_yes, countries_no, islive = (
@@ -98,8 +101,7 @@ class TaskProcessor:
                     logger.error(error)
             else:
                 # ytproxy = self.proxyman.get_checked_proxy_by_countries(["US"], [])
-                ytproxy = None
-                video_info = get_media_info(self.task.url, proxy=ytproxy)
+                video_info = get_media_info(self.task.url, proxy=None)
                 if not video_info or video_info.get("error"):
                     error = video_info.get("error", "Unknown error")
                     logger.error(f"Error getting video info: {error}")

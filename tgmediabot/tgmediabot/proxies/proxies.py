@@ -46,6 +46,7 @@ class ProxyRevolver(ModelManager):
         self._sessionlocal = db
         self.__current = 0
         self.__proxies = []
+        self__uses = 0
         self.__token = proxy_token
         self._load_proxies()
 
@@ -212,4 +213,8 @@ class ProxyRevolver(ModelManager):
                 return http_proxy
             logger.debug(f"Proxy {http_proxy} failed")
         logger.error(f"Failed to get a proxy after {attempts} attempts")
+        self.__uses += 1
+        # update proxies every 50 uses
+        if self.__uses % 50 == 0:
+            self._load_proxies()
         return None

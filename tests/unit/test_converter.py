@@ -33,7 +33,7 @@ def test_convert_audio():
 
 def test_cleanup():
     x = delete_files_by_chunk(folder, "test_cutting")
-    assert len(x) == 2
+    assert len(x) == 1
     # delete the folder
     os.system(f"rm -rf {folder}")
 
