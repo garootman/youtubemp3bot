@@ -253,6 +253,7 @@ async def msg_handler(message: Message) -> None:
 
     user_limits = payman.check_daily_limit_left(message.from_user.id)
     user_premium = payman.get_user_premium_sub(message.from_user.id)
+    is_premium = True if user_premium else False
     priority = 0 if user_premium else 1
 
     if user_limits <= 0 and not user_premium:
@@ -276,7 +277,7 @@ async def msg_handler(message: Message) -> None:
 
     wait_msg = await message.answer("Getting video info...")
     # run task in foreground, get enrichment data with celery task "enrich_tp_task"
-    rich_task = enrich_tp_task(task_id)
+    rich_task = enrich_tp_task(task_id, is_premium)
 
     rich_dict = rich_task.__dict__
     msg = f"Got task data: {rich_dict}"

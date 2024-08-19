@@ -43,7 +43,7 @@ def process_task(task_id: str, cleanup=True):
 
 
 # @celery_app.task
-def enrich_tp_task(task_id: str):
+def enrich_tp_task(task_id: str, premium: bool = False):
     task_processor = TaskProcessor(
         task_id=task_id,
         proxymanager=proxy_mgr,
@@ -52,7 +52,7 @@ def enrich_tp_task(task_id: str):
         payman=pwm,
     )
 
-    result = task_processor.enrich_task(ignore_status=True)
+    result = task_processor.enrich_task(ignore_status=True, premium=premium)
     return result
 
 

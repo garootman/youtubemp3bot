@@ -66,7 +66,7 @@ class TaskProcessor:
         logger.info(f"TaskProcessor initialized with task id {self.task_id}")
 
     # @retry()
-    def enrich_task(self, ignore_status=False):
+    def enrich_task(self, ignore_status=False, premium=False):
         logger.info(f"Enriching task {self.task_id}")
         task = self.taskman.get_task_by_id(self.task_id)
         if not task:
@@ -83,6 +83,8 @@ class TaskProcessor:
             plid = extract_plyalist_id(task.url)
             links = self.ytclient.get_playlist_media_links(plid, raise_on_error=False)
             platform = "youtube"
+            if not premium:
+                links = [links[0]]
         else:
             links = [self.task.url]
         islive = False
@@ -95,12 +97,10 @@ class TaskProcessor:
                 title, channel, duration, countries_yes, countries_no, islive = (
                     self.ytclient.get_full_info(media_id)
                 )
-                # logger.debug(f"Countries: {countries_yes} ({type(countries_yes)}), {countries_no} ({type(countries_no)})")
                 if islive:
                     error = "Video is live and cannot be downloaded"
                     logger.error(error)
             else:
-                # ytproxy = self.proxyman.get_checked_proxy_by_countries(["US"], [])
                 video_info = get_media_info(self.task.url, proxy=None)
                 if not video_info or video_info.get("error"):
                     error = video_info.get("error", "Unknown error")
