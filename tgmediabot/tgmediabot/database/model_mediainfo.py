@@ -37,6 +37,7 @@ class MediaInfo(Base):
 
     error = Column(TEXT, default="")
     tg_file_id = Column(TEXT, default="")
+    formats_json = Column(TEXT, default="")
 
     islive = Column(Boolean, default=False)
 

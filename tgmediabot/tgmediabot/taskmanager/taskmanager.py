@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from tgmediabot.database import MediaInfo, Task
+from tgmediabot.database import MediaInfo, Task, TgMediaInfo
 from tgmediabot.modelmanager import ModelManager
 
 logging.basicConfig(
@@ -32,6 +32,44 @@ class TaskManager(ModelManager):
 
         return self.get_task_by_id(task_id)
 
+    def create_tgfile_info(self, remote_task_id, file_id, success, error):
+        logger.debug(f"Creating tgfile_info for task {remote_task_id}")
+
+        with self._session() as db:
+            tgfile_info = TgMediaInfo(
+                remote_task_id=remote_task_id,
+                file_id=file_id,
+                success=success,
+                error=error,
+            )
+            db.add(tgfile_info)
+            db.commit()
+            tgfile_info_id = tgfile_info.id
+            db.expunge(tgfile_info)
+            logger.info(f"TgMediaInfo {tgfile_info_id} added for task {remote_task_id}")
+
+        return tgfile_info_id
+
+    def update_tgfile_info(self, tgfile_info):
+        with self._session() as db:
+            merged_tgfile_info = db.merge(tgfile_info)
+            db.commit()
+            logger.info(f"TgMediaInfo {merged_tgfile_info.id} merged and updated")
+            # return merged_tgfile_info free from session
+            db.expunge(merged_tgfile_info)
+            return merged_tgfile_info
+
+    def get_tgfile_info(self, remote_task_id):
+        with self._session() as db:
+            tgfile_info = (
+                db.query(TgMediaInfo)
+                .filter(TgMediaInfo.remote_task_id == remote_task_id)
+                .first()
+            )
+            if tgfile_info:
+                db.expunge(tgfile_info)
+            return tgfile_info
+
     def create_media_info(
         self,
         task_id,
@@ -45,6 +83,7 @@ class TaskManager(ModelManager):
         channel,
         duration,
         filesize,
+        formats_json,
     ):
         """
         id = Column(String(20), primary_key=True, index=True, default=new_id)
@@ -81,6 +120,7 @@ class TaskManager(ModelManager):
                 channel=channel,
                 duration=duration,
                 filesize=filesize,
+                formats_json=formats_json,
             )
             db.add(media_info)
             db.commit()

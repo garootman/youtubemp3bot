@@ -53,6 +53,13 @@ def delete_messages(chat_id, msg_batch):
     return True
 
 
+def resend_media(chat_id, file_id, caption, format):
+    if format == "audio":
+        return send_audio(chat_id=chat_id, audio=file_id, caption=caption)
+    else:
+        return send_video(chat_id=chat_id, video=file_id, caption=caption)
+
+
 def mass_send_audio(
     chat_id, audio_list, mode, title, format_type="audio", width=0, height=0
 ):

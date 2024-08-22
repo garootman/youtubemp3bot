@@ -16,6 +16,8 @@ from .db_config import Base
 
 sys.path.append("..")
 
+import random
+
 from tgmediabot.assist import new_id, plainstring, utcnow
 
 

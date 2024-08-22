@@ -3,7 +3,16 @@ import os
 
 from yt_dlp import YoutubeDL
 
+from tgmediabot.envs import (
+    MEDIASERVER_IP,
+    MEDIASERVER_PASSWORD,
+    MEDIASERVER_PORT,
+    MEDIASERVER_USER,
+)
+
 from .yt_dlp_options import DOWNLOAD_OPTIONS
+
+auth = (MEDIASERVER_USER, MEDIASERVER_PASSWORD)
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -44,9 +53,6 @@ def download_audio(url, filepath, proxy=None, platform="youtube", media="m4a"):
         ydl_opts["proxy"] = proxy
     else:
         ydl_opts.pop("proxy", None)
-
-    # if mediaformat:
-    #    ydl_opts["format"] = mediaformat
 
     with YoutubeDL(ydl_opts) as ydl:
         try:

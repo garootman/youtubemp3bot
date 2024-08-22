@@ -11,7 +11,7 @@ from tgmediabot.medialib import YouTubeAPIClient, get_media_info, select_quality
 from tgmediabot.paywall import PayWallManager
 from tgmediabot.proxies import ProxyRevolver
 from tgmediabot.taskmanager import TaskManager
-from tgmediabot.taskprocessor import TaskProcessor
+from tgmediabot.taskprocessor import RemoteTaskProcessor, TaskProcessor
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -30,7 +30,7 @@ yt_client = YouTubeAPIClient(GOOGLE_API_KEY, ytapi_proxy)
 
 @celery_app.task
 def process_task(task_id: str, cleanup=True):
-    task_processor = TaskProcessor(
+    task_processor = RemoteTaskProcessor(
         task_id=task_id,
         proxymanager=proxy_mgr,
         taskmanager=taskman,
@@ -44,7 +44,7 @@ def process_task(task_id: str, cleanup=True):
 
 # @celery_app.task
 def enrich_tp_task(task_id: str, premium: bool = False):
-    task_processor = TaskProcessor(
+    task_processor = RemoteTaskProcessor(
         task_id=task_id,
         proxymanager=proxy_mgr,
         taskmanager=taskman,
@@ -79,9 +79,9 @@ if __name__ == "__main__":
 """
 
 if __name__ == "__main__":
-    task_id = "0c13e832d5c4"
+    task_id = "67c392791c26"
 
-    task_processor = TaskProcessor(
+    task_processor = RemoteTaskProcessor(
         task_id=task_id,
         proxymanager=proxy_mgr,
         taskmanager=taskman,
@@ -90,4 +90,5 @@ if __name__ == "__main__":
     )
     result = task_processor.process(cleanup=False, ignore_status=True)
     print(result)
+
 """

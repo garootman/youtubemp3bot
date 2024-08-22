@@ -10,10 +10,10 @@ logger = get_logger(__name__)
 
 class PayWallManager(ModelManager):
 
-    DAILY_LIMITS_FREE = 20  # daily limit for free users
-    DAILY_LIMITS_PREMIUM = 500  # daily limit for premium users
+    DAILY_LIMITS_FREE = 50  # daily limit for free users
+    DAILY_LIMITS_PREMIUM = 1000  # daily limit for premium users
     PREMIUM_DAYS = {"day": 1, "week": 7, "month": 30}
-    FORMAT_LIMITS = {"m4a": 1, "mp3": 2, "360": 3, "720": 4, "1080": 5}
+    FORMAT_LIMITS = {"m4a": 1, "mp3": 2, "360": 4, "720": 8, "1080": 16}
 
     def buy_premium(self, user_id, package_type, start_date=None):
         if not start_date:

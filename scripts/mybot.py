@@ -34,6 +34,7 @@ from tgmediabot.chatmanager import ChatManager
 from tgmediabot.database import Base, SessionLocal, create_db, engine, session_scope
 from tgmediabot.envs import (
     ADMIN_ID,
+    AGENT_ID,
     OWNER_ID,
     PAY_LINK,
     TG_TOKEN,
@@ -240,10 +241,39 @@ async def feedback_message_handler(message: Message, state: FSMContext) -> None:
     )
 
 
+async def handle_update_media(message: Message) -> None:
+    bump(message)
+    if message.audio:
+        file_id = message.audio.file_id
+    elif message.video:
+        file_id = message.video.file_id
+    elif message.document:
+        file_id = message.document.file_id
+    else:
+        msg = f"No media found in the message"
+        await message.answer(msg)
+        return
+
+    if message.caption:
+        remote_task_id = message.caption
+    elif message.text:
+        remote_task_id = message.text
+    else:
+        msg = f"No task id found in the message"
+        await message.answer(msg)
+        return
+    taskman.create_tgfile_info(remote_task_id, file_id, success=True, error="")
+    msg = f"Added file_id {file_id} to task {remote_task_id}"
+    await message.answer(msg)
+
+
 @form_router.message()
 async def msg_handler(message: Message) -> None:
     logger.info(f"Processing message")
     # logger.debug(f"Message: {message}")
+    if int(message.from_user.id) == int(AGENT_ID):
+        await handle_update_media(message)
+        return
     bump(message)
     links = extract_urls(message.text)
     if not links:
@@ -328,7 +358,9 @@ async def send_choose_format_msg(
 ) -> None:
     media_objects = taskman.get_media_objects(task_id)
     if not media_objects:
-        msg = "No videos found, sorry 🤷‍♂️ Try another link"
+        msg = (
+            "Counld not get video formats, sorry 🤷‍♂️ Try another once again, or trylink"
+        )
         await message.answer(msg)
         return
     # send message  user: info of link metadata,
@@ -344,7 +376,7 @@ async def send_choose_format_msg(
         return
 
     builder = InlineKeyboardBuilder()
-    for format in ["m4a", "mp3"]:  # , "360", "720"]:
+    for format in ["m4a", "mp3", "360"]:# , "720"]:
         star_price = payman.calc_durlist_limits(durlist, format)
         if star_price <= user_limits:
             builder.button(
