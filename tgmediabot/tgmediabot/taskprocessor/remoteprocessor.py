@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import shutil
 import time
 from datetime import timedelta
 
@@ -17,18 +16,16 @@ from tgmediabot.envs import ADMIN_ID, AUDIO_PATH, FFMPEG_TIMEOUT, MAX_FILE_SIZE
 from tgmediabot.medialib import (
     check_download_status,
     download_media_remote,
-    fix_file_name,
     get_media_info_remote,
     send_to_telegram,
 )
 
+# from tgmediabot.taskmanager import TaskManager
+from tgmediabot.telelib import resend_media, send_msg
+
 # from tgmediabot.paywall import PayWallManager
 # from tgmediabot.proxies import ProxyRevolver
-from tgmediabot.splitter import convert_audio  # delete_files_by_chunk,
-from tgmediabot.splitter import get_resolution, split_media
 
-# from tgmediabot.taskmanager import TaskManager
-from tgmediabot.telelib import delete_messages, mass_send_audio, resend_media, send_msg
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"

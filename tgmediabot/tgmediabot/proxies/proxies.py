@@ -3,7 +3,6 @@ import os
 import random
 import re
 import time
-from abc import ABC, abstractmethod
 
 import requests
 
@@ -65,6 +64,7 @@ class ProxyRevolver(ModelManager):
         response = requests.get(
             PROXY_API_URL,
             headers={"Authorization": self.__token},
+            timeout=10,
         )
         data = response.json()
         if not data:

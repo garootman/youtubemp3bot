@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 
@@ -17,9 +18,8 @@ init_path = os.path.join("tests", "unit", "test_cutting.m4a.test")
 
 
 def test_prepare():
-
-    os.system(f"mkdir -p {folder}")
-    os.system(f"cp {init_path} {filepath}")
+    os.makedirs(folder, exist_ok=True)
+    shutil.copy(init_path, filepath)
     assert os.path.exists(filepath)
 
 
@@ -51,8 +51,7 @@ def test_big_filesize_one_chunk():
 def test_cleanup():
     x = delete_files_by_chunk(folder, "test_cutting")
     assert len(x) == 3
-    # delete the folder
-    os.system(f"rm -rf {folder}")
+    shutil.rmtree(folder, ignore_errors=True)
 
 
 if __name__ == "__main__":

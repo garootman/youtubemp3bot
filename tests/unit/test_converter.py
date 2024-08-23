@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import pytest
 
@@ -14,15 +15,9 @@ init_path = os.path.join("tests", "unit", "test_cutting.m4a.test")
 
 
 def test_prepare():
-
-    os.system(f"mkdir -p {folder}")
-    os.system(f"cp {init_path} {filepath}")
+    os.makedirs(folder, exist_ok=True)
+    shutil.copy(init_path, filepath)
     assert os.path.exists(filepath)
-
-
-# test sequence:
-# check correct workflow: returns the path to the converted file in mp3
-# assert that the file exists and is not empty
 
 
 def test_convert_audio():
@@ -34,8 +29,7 @@ def test_convert_audio():
 def test_cleanup():
     x = delete_files_by_chunk(folder, "test_cutting")
     assert len(x) == 1
-    # delete the folder
-    os.system(f"rm -rf {folder}")
+    shutil.rmtree(folder, ignore_errors=True)
 
 
 if __name__ == "__main__":

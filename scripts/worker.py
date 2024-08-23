@@ -1,17 +1,14 @@
 # separate file for sending results to user
 import logging
-import os
-import time
-from datetime import timedelta
 
 from celery_config import celery_app
 
 from tgmediabot.envs import GOOGLE_API_KEY, PROXY_TOKEN
-from tgmediabot.medialib import YouTubeAPIClient, get_media_info, select_quality_format
+from tgmediabot.medialib import YouTubeAPIClient
 from tgmediabot.paywall import PayWallManager
 from tgmediabot.proxies import ProxyRevolver
 from tgmediabot.taskmanager import TaskManager
-from tgmediabot.taskprocessor import RemoteTaskProcessor, TaskProcessor
+from tgmediabot.taskprocessor import RemoteTaskProcessor
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"

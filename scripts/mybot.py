@@ -9,41 +9,21 @@ sends mp3 file to user
 
 import logging
 
-from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import (
-    CallbackQuery,
-    InlineKeyboardButton,
-    LabeledPrice,
-    Message,
-    PreCheckoutQuery,
-)
+from aiogram.types import CallbackQuery, LabeledPrice, Message, PreCheckoutQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from worker import enrich_tp_task, process_task
 
-from tgmediabot.assist import (
-    extract_platform,
-    extract_urls,
-    extract_youtube_info,
-    utcnow,
-)
+from tgmediabot.assist import extract_urls
 from tgmediabot.chatmanager import ChatManager
-from tgmediabot.database import Base, SessionLocal, create_db, engine, session_scope
-from tgmediabot.envs import (
-    ADMIN_ID,
-    AGENT_ID,
-    OWNER_ID,
-    PAY_LINK,
-    TG_TOKEN,
-    USAGE_PERIODIC_LIMIT,
-    USAGE_TIMEDELTA_HOURS,
-)
+from tgmediabot.database import SessionLocal, create_db
+from tgmediabot.envs import ADMIN_ID, AGENT_ID, OWNER_ID, PAY_LINK, TG_TOKEN
 from tgmediabot.paywall import PayWallManager
 from tgmediabot.taskmanager import TaskManager
-from tgmediabot.taskprocessor import TaskProcessor
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -376,7 +356,7 @@ async def send_choose_format_msg(
         return
 
     builder = InlineKeyboardBuilder()
-    for format in ["m4a", "mp3", "360"]:# , "720"]:
+    for format in ["m4a", "mp3", "360"]:  # , "720"]:
         star_price = payman.calc_durlist_limits(durlist, format)
         if star_price <= user_limits:
             builder.button(
