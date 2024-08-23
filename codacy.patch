@@ -1,0 +1,15 @@
+diff --git a/tgmediabot/README.md b/tgmediabot/README.md
+--- a/tgmediabot/README.md
++++ b/tgmediabot/README.md
+@@ -3,1 +3,1 @@
+-Code for Telegram bot: https://t.me/tube2mp3bot
++Code for Telegram bot: <https://t.me/tube2mp3bot>
+diff --git a/README.MD b/README.MD
+--- a/README.MD
++++ b/README.MD
+@@ -3,1 +3,1 @@
+-Code for Telegram bot: https://t.me/tube2mp3bot
++Code for Telegram bot: <https://t.me/tube2mp3bot>
+@@ -19,1 +19,1 @@
+-
++

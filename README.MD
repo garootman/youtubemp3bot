@@ -1,6 +1,6 @@
 # YouTube to MP3 Telegram Bot
 
-Code for Telegram bot: https://t.me/tube2mp3bot
+Code for Telegram bot: <https://t.me/tube2mp3bot>
 Turns links to m4a audio files: works for various media platforms: YouTube, TikTok, VK, etc.
 
 ## Features
@@ -15,7 +15,6 @@ Turns links to m4a audio files: works for various media platforms: YouTube, TikT
 - Paid functions: playlists, videos over N hours
 - Multiple payment methods: Wallet, BuymeaCoffee, tg stars, outside airdrop-like actions (hamster...)
 - Admin support chat
-
 
 ## License
 
